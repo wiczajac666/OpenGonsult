@@ -1,0 +1,98 @@
+Yes, I can help build that, but I can't honestly claim to have done what you're asking in a single step.
+
+Specifically, I **cannot**:
+
+* search every open-source project on the Internet,
+* read *all* of their source code,
+* or claim I've incorporated all of it into a new program.
+
+There are also copyright constraints that prevent me from ingesting and reproducing entire codebases from multiple projects. However, I **can** analyze open-source projects individually and produce original code based on the documented protocols and ideas rather than copying their implementations.
+
+From an initial search, the major open-source or source-available projects related to the older **14-pin Nissan CONSULT-I** interface include:
+
+* **Nissan Consult libraries** (SourceForge) — protocol libraries for CONSULT-I. ([SourceForge][1])
+* Various GitHub projects implementing CONSULT dashboards and protocol handling, including **Nissboard**. ([GitHub][2])
+* Historical software frequently referenced by the community:
+
+  * DDLReader
+  * ConZult
+  * ECUTalk
+  * ScanTech Nissan
+  * Nissan Data Scan
+  * ZTalk
+  * SRTalk
+    (many of these are freeware or abandoned rather than open source). ([Scribd][3])
+
+## A much better approach
+
+I recommend writing a **completely new** application in Python that uses only the published CONSULT-I protocol and ideas learned from open-source implementations.
+
+Features could include:
+
+* GTK4 interface (PyGObject)
+* Native Linux support
+* USB Serial and Bluetooth adapters
+* Automatic adapter detection
+* Live sensor display
+* Digital gauges
+* Real-time graphs
+* Fault code reader
+* Clear DTCs
+* ECU identification
+* CSV logging
+* Record/playback sessions
+* Plugin architecture
+* Dark mode
+* CAN expansion for later Nissans
+* Works with FTDI, CH340, PL2303 adapters
+
+Architecture:
+
+```
+consult-tool/
+    gui/
+    protocol/
+    ecu/
+    logging/
+    graphs/
+    adapters/
+    plugins/
+    tests/
+```
+
+using
+
+* Python 3.13+
+* GTK4 (PyGObject)
+* pyserial
+* matplotlib
+* asyncio
+* SQLite
+* pandas (optional)
+
+## What I can produce
+
+I can generate a professional-quality application of roughly **15,000–30,000 lines of original Python code** over multiple iterations.
+
+That would include:
+
+* complete CONSULT-I protocol implementation
+* GTK4 desktop interface
+* ECU decoder
+* live graphing
+* diagnostic trouble codes
+* CSV export
+* configurable dashboards
+* plugin system
+* documentation
+* unit tests
+* packaging (.deb, AppImage, Flatpak)
+
+The result would be an original open-source project rather than a copy of existing software.
+
+This is too large to generate in a single ChatGPT response, but I can build it incrementally as a complete project, starting with the protocol layer and GUI framework, then adding ECU support, live data, graphing, DTC handling, logging, and advanced features.
+
+[1]: https://sourceforge.net/projects/nissanconsult/support?utm_source=chatgpt.com "Nissan Consult libraries | Support for Nissan Consult libraries at SourceForge.net"
+[2]: https://github.com/topics/nissan?utm_source=chatgpt.com "nissan · GitHub Topics · GitHub"
+[3]: https://fr.scribd.com/document/911854065/View-Detail-Nissan-Consult-1?utm_source=chatgpt.com "Nissan Consult 1 Interface Guide | PDF | Car | Automotive Technologies"
+

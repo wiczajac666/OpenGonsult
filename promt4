@@ -1,0 +1,473 @@
+Yes. A multi-agent architecture is a good fit for a project of this size. I can't actually launch autonomous subagents that work in parallel over time within ChatGPT, but I can design a project that is intended to be executed by an external multi-agent framework (or by a human coordinating multiple coding agents).
+
+Here's a scalable architecture.
+
+# Project: OpenConsult
+
+**Goal**
+
+Create a native Linux GTK4 diagnostic suite for Nissan CONSULT-I (14-pin connector) written entirely in Python.
+
+---
+
+# Orchestrator
+
+The orchestrator is the only agent allowed to merge code into `main`.
+
+Responsibilities:
+
+* maintain project state
+* assign tasks
+* detect merge conflicts
+* review pull requests
+* schedule work
+* run automated tests
+* generate releases
+* monitor coverage
+* maintain documentation
+* ensure coding standards
+
+Maintains a project database containing:
+
+```text
+Tasks
+Dependencies
+Progress
+Completed Modules
+Failed Tests
+Known Bugs
+Agent Status
+Current Sprint
+```
+
+---
+
+# Agent 1 — Protocol Team
+
+Owns
+
+```
+protocol/
+```
+
+Tasks
+
+* CONSULT-I packets
+* checksum
+* serial framing
+* timing
+* retries
+* ECU discovery
+* command encoder
+* response decoder
+
+Deliverables
+
+```
+consult.py
+packets.py
+serial.py
+timing.py
+```
+
+---
+
+# Agent 2 — ECU Database
+
+Owns
+
+```
+ecu/
+```
+
+Tasks
+
+* ECU definitions
+
+* sensor tables
+
+* lookup tables
+
+* DTC database
+
+* scaling
+
+Produces
+
+```
+ecu_db.py
+dtc.py
+sensors.py
+```
+
+---
+
+# Agent 3 — GUI
+
+Owns
+
+```
+gui/
+```
+
+GTK4 only
+
+Responsibilities
+
+Dashboard
+
+Graphs
+
+Menus
+
+Settings
+
+Dialogs
+
+Dark mode
+
+---
+
+# Agent 4 — Dashboard
+
+Creates
+
+```
+gauges
+digital displays
+custom dashboards
+widgets
+themes
+```
+
+---
+
+# Agent 5 — Graphing
+
+Responsible for
+
+```
+live graphs
+
+zoom
+
+history
+
+recording
+
+playback
+
+CSV export
+```
+
+---
+
+# Agent 6 — Serial Communication
+
+Works only on
+
+```
+USB
+
+Bluetooth
+
+FTDI
+
+CH340
+
+PL2303
+
+device discovery
+
+hotplug
+```
+
+---
+
+# Agent 7 — Logging
+
+Produces
+
+```
+CSV
+
+SQLite
+
+JSON
+
+session recording
+
+replay
+
+compression
+```
+
+---
+
+# Agent 8 — Testing
+
+Creates
+
+```
+unit tests
+
+protocol tests
+
+GUI tests
+
+performance tests
+
+integration tests
+
+hardware simulation
+```
+
+---
+
+# Agent 9 — Documentation
+
+Maintains
+
+```
+README
+
+API docs
+
+User manual
+
+Developer guide
+
+Protocol specification
+
+Examples
+```
+
+---
+
+# Agent 10 — Plugin SDK
+
+Creates
+
+```
+plugin API
+
+plugin loader
+
+plugin examples
+
+version compatibility
+```
+
+---
+
+# Agent 11 — Packaging
+
+Produces
+
+```
+Flatpak
+
+AppImage
+
+.deb
+
+RPM
+
+pip package
+
+Docker image
+```
+
+---
+
+# Agent 12 — Hardware Emulator
+
+Creates a simulated ECU.
+
+Allows development without a car.
+
+Supports
+
+```
+fake RPM
+
+fake TPS
+
+fake coolant temp
+
+inject DTCs
+
+replay logs
+
+timing simulation
+```
+
+---
+
+# Agent 13 — CI/CD
+
+Maintains
+
+GitHub Actions
+
+Linting
+
+Formatting
+
+Coverage
+
+Nightly builds
+
+Release automation
+
+---
+
+# Agent 14 — Performance
+
+Optimizes
+
+memory
+
+CPU
+
+graph rendering
+
+large logs
+
+serial throughput
+
+---
+
+# Agent 15 — Security
+
+Checks
+
+unsafe plugins
+
+input validation
+
+malformed packets
+
+buffer safety
+
+dependency vulnerabilities
+
+---
+
+# Repository Layout
+
+```text
+OpenConsult/
+
+    orchestrator/
+
+    protocol/
+
+    serial/
+
+    ecu/
+
+    gui/
+
+    dashboard/
+
+    graphs/
+
+    logging/
+
+    plugins/
+
+    emulator/
+
+    docs/
+
+    tests/
+
+    packaging/
+
+    scripts/
+
+    ci/
+
+    resources/
+
+    icons/
+
+    themes/
+
+    examples/
+```
+
+---
+
+# Task Database
+
+Example JSON
+
+```json
+{
+  "task": "Implement ECU packet parser",
+  "owner": "ProtocolAgent",
+  "priority": "High",
+  "status": "Working",
+  "depends_on": [
+    "Serial Layer"
+  ],
+  "progress": 65,
+  "tests": 14,
+  "coverage": 93.1
+}
+```
+
+---
+
+# Communication Bus
+
+Agents communicate only through the orchestrator.
+
+```
+Agent
+
+↓
+
+Task Queue
+
+↓
+
+Orchestrator
+
+↓
+
+Reviewer
+
+↓
+
+Merge Queue
+
+↓
+
+Main Branch
+```
+
+No direct agent-to-agent writes are allowed.
+
+---
+
+# Milestones
+
+1. Repository and CI setup
+2. Serial communication
+3. CONSULT-I protocol implementation
+4. ECU discovery
+5. Live sensor streaming
+6. Basic GTK dashboard
+7. Graphing and logging
+8. DTC read/clear
+9. Session recording and replay
+10. Plugin API
+11. Hardware emulator
+12. Documentation and packaging
+13. Version 1.0 release
+
+This structure is well suited to orchestration frameworks such as OpenAI Codex, Claude Code, Aider, Roo Code, or similar systems where multiple coding agents can work concurrently under the supervision of an orchestrator that tracks task ownership, dependencies, progress, and integration.
+
