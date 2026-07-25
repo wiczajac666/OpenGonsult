@@ -66,6 +66,8 @@ class ECUDatabase:
                 "intake_air_temp": SensorDefinition("Intake Air Temp", "°C", -40, 120),
                 "maf_sensor": SensorDefinition("MAF Sensor", "g/s", 0, 500),
                 "oxygen_sensor": SensorDefinition("O2 Sensor", "V", 0, 1.5),
+                # v0.69+ additions: Battery voltage monitoring for dashboard gauges
+                "battery_voltage": SensorDefinition("Battery Voltage", "V", 8.0, 16.0),
             },
             dtc_codes={
                 "P0300": DTCDefinition(
