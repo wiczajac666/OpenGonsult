@@ -181,8 +181,13 @@ class MainWindow(Gtk.ApplicationWindow):
         return toolbar
     
     def create_dashboard_page(self, notebook):
-        """Create the live dashboard page"""
-        page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        """Create the live dashboard page with RPM/temperature/voltage gauges (v0.69+)"""
+        from ecu.sensor_reader import DashboardDataProcessor, SensorType
+        
+        # Initialize data processor for real-time gauge updates
+        self.data_processor = DashboardDataProcessor()
+        
+        page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         page.set_margin_top(10)
         page.set_margin_bottom(10)
         page.set_margin_start(10)
@@ -193,11 +198,31 @@ class MainWindow(Gtk.ApplicationWindow):
         title_label.add_css_class("title-2")
         page.pack_start(title_label, False, False, 0)
         
-        # Sensor grid (placeholder for future implementation)
-        sensor_grid = Gtk.Grid()
-        sensor_grid.set_column_spacing(10)
-        sensor_grid.set_row_spacing(10)
-        page.pack_start(sensor_grid, True, True, 0)
+        # Gauge container with circular progress indicators (RPM/temp/voltage)
+        gauge_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
+        gauge_container.set_margin_top(20)
+        page.pack_start(gauge_container, True, True, 0)
+        
+        # Engine RPM Gauge
+        rpm_box = self.create_gauge_section("Engine RPM", "RPM")
+        self.rpm_progress_bar = Gtk.ProgressBar()
+        rpm_box.pack_start(self.rpm_progress_bar, False, False, 5)
+        gauge_container.pack_start(rpm_box, True, True, 0)
+        
+        # Coolant Temperature Gauge
+        temp_box = self.create_gauge_section("Coolant Temp", "°C")
+        self.temp_progress_bar = Gtk.ProgressBar()
+        temp_box.pack_start(self.temp_progress_bar, False, False, 5)
+        gauge_container.pack_start(temp_box, True, True, 0)
+        
+        # Battery Voltage Gauge
+        voltage_box = self.create_gauge_section("Battery Voltage", "V")
+        self.voltage_progress_bar = Gtk.ProgressBar()
+        voltage_box.pack_start(self.voltage_progress_bar, False, False, 5)
+        gauge_container.pack_start(voltage_box, True, True, 0)
+        
+        # Update loop for dashboard (called every second to refresh gauges)
+        GLib.timeout_add_seconds(1, self.update_dashboard_gauges)
         
         notebook.append_page(page, Gtk.Label.new("Dashboard"))
     
@@ -439,6 +464,45 @@ class MainWindow(Gtk.ApplicationWindow):
         Gtk.StyleContext.add_provider_for_screen(
             screen, css_provider, 
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+    
+    def create_gauge_section(self, label_text: str, unit_label: str) -> Gtk.Box:
+        """Create a gauge display section with progress bar (used for RPM/temp/voltage gauges v0.69+)"""
+        container = Gtk.Grid()
+        container.set_column_spacing(8)
+        
+        # Label row
+        label_widget = Gtk.Label(label=label_text, xalign=0)
+        unit_label_widget = Gtk.Label(label=f" {unit_label}", xalign=1)
+        container.attach(label_widget, 0, 0, 2, 1)  
+        container.attach(unit_label_widget, 0, 1, 2, 1)  # Below the main label
+        return container
+    
+    def update_dashboard_gauges(self):
+        """Refresh gauge displays every second (called via GLib timeout for real-time updates v0.69+)"""
+        if hasattr(self, 'data_processor') and self.data_processor:
+            # Engine RPM - 0-8000 range typical
+            rpm_value = self.data_processor.get_current_value(SensorType.ENGINE_RPM)
+            if rpm_value is not None:
+                max_rpm = 8000.0
+                progress = min(1.0, (rpm_value / max_rpm))
+                GLib.idle_add(self.rpm_progress_bar.set_fraction, float(progress))
+                
+            # Coolant Temp - -40 to +150°C range typical
+            temp_value = self.data_processor.get_current_value(SensorType.COOLANT_TEMP)
+            if temp_value is not None:
+                min_temp, max_temp = -40.0, 150.0
+                progress = (temp_value - min_temp) / (max_temp - min_temp)
+                GLib.idle_add(self.temp_progress_bar.set_fraction, float(max(0, min(1, progress))))
+            
+            # Battery Voltage - ~9 to 16V range typical
+            voltage_value = self.data_processor.get_current_value(SensorType.BATTERY_VOLTAGE)  
+            if voltage_value is not None:
+                min_volt, max_volt = 8.0, 16.0
+                progress = (voltage_value - min_volt) / (max_volt - min_volt)
+                GLib.idle_add(self.voltage_progress_bar.set_fraction, float(max(0, min(1, progress))))
+        
+        # Continue updates every second
+        return True
 
 
 class Application(Gtk.Application):
