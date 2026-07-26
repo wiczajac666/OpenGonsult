@@ -1,5 +1,5 @@
 Package: openconsult
-Version: 0.67-1jammy
+Version: 0.69+-1jammy
 Section: utils
 Priority: optional
 Architecture: amd64
@@ -11,7 +11,8 @@ Description: OpenConsult - Nissan CONSULT-I Diagnostic Tool for Linux
  This is an open-source diagnostic tool that interfaces with Nissan vehicle ECU systems using the CONSULT-I protocol over serial connections (USB or Bluetooth).
  Features include:
  * Real-time sensor monitoring and dashboard display
- * Live data visualization graphs
+   (RPM, temperature, battery voltage gauges v0.69+)
+ * Live data visualization graphs with animated progress bars 🧝✨
  * DTC (Diagnostic Trouble Code) reading and clearing
  * Multi-ECU support for various Nissan models
  * Dark mode UI theme with GTK4 modern design
