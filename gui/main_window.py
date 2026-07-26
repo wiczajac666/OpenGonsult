@@ -308,16 +308,14 @@ class MainWindow(Gtk.ApplicationWindow):
         settings_grid.set_margin_top(10)
         page.pack_start(settings_grid, True, True, 0)
         
-        # Serial port selection
-        label_serial = Gtk.Label(label="Serial Port:")
+        # Serial port selection (free text input v0.69+) 🧝⚡🔌
+        label_serial = Gtk.Label(label="Serial Port: ⚙️")
         settings_grid.attach(label_serial, 0, 0, 1, 1)
-        
-        self.serial_port_combo = Gtk.ComboBoxText.new()
-        self.serial_port_combo.set_hexpand(True)
-        self.serial_port_combo.append_text("/dev/ttyUSB0")
-        self.serial_port_combo.append_text("/dev/ttyUSB1") 
-        self.serial_port_combo.append_text("Bluetooth COM Port")
-        settings_grid.attach(self.serial_port_combo, 1, 0, 2, 1)
+
+        self.serial_port_entry = Gtk.Entry()
+        self.serial_port_entry.set_placeholder_text("Enter serial port (e.g., /dev/ttyUSB0)")
+        self.serial_port_entry.set_hexpand(True)
+        settings_grid.attach(self.serial_port_entry, 1, 0, 2, 1)
         
         # Baud rate selection
         label_baud = Gtk.Label(label="Baud Rate:")
@@ -376,8 +374,8 @@ class MainWindow(Gtk.ApplicationWindow):
         dialog.destroy()
         
     def on_connect(self, widget):
-        """Handle connection request"""
-        port = self.serial_port_combo.get_active_text()
+        """Handle connection request (free text port input v0.69+) 🧝⚡🔌"""
+        port = self.serial_port_entry.get_text().strip() or "/dev/ttyUSB0"
         baud_rate = int(self.baud_rate_combo.get_active_text())
         
         # In a real implementation, this would connect to the ECU
