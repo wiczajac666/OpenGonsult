@@ -1,0 +1,26 @@
+.TH OPENGONSULT 1 "August 2026" "OpenGonsult 0.88" "User Commands"
+.SH NAME
+opengonsult \- Nissan CONSULT-I diagnostic suite for Linux (GTK4)
+.SH SYNOPSIS
+.B opengonsult
+.RI [ options ]
+.SH DESCRIPTION
+.B OpenGonsult
+is an open-source diagnostic tool for Nissan vehicles equipped with the
+CONSULT-I (14-pin) diagnostic interface. It provides a native GTK4
+interface with a left navigation panel containing five pages: live
+Dashboard with circular visual gauges, Graphing with selectable sensor
+sources, Diagnostics for diagnostic trouble codes, Settings for serial
+device and theme configuration, and About.
+.SH OPTIONS
+.TP
+.BR \-v ", " \-\-version
+Print the application version and exit.
+.SH CONFIGURATION
+Settings are persisted to
+.IR ~/.config/opengonsult/config.json
+(dark mode, serial device, baud rate, simulation mode).
+.SH SEE ALSO
+GTK4 documentation, CONSULT-I protocol references.
+.SH AUTHOR
+OpenGonsult Maintainers <OpenConsult@users.noreply.github.com>

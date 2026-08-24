@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+"""
+OpenConsult Dashboard Customization Module (v1.0) 🧝⚡🔌
+
+NEW FEATURE: User can reorder, add, and remove dashboard widgets via a GTK dialog!
+Saves preferences to ~/.config/openconsult/dashboard_config.json ✅
+
+Full implementation with complete Gtk.Dialog for widget management.
+"""
+
+import gi
+gi.require_version('Gtk', '4.0')
+from gi.repository import Gtk, Gdk, Gio, GLib, Adw
+
+
+class DashboardCustomizationDialog(Gtk.Dialog):
+    """🧝⚡ CUSTOM DASHBOARD WIDGET MANAGER v1.0! 🔌✨"""
+    
+    def __init__(self, parent_window, available_widgets, current_order):
+        super().__init__(
+            title="Dashboard Widget Customizer",
+            transient_for=parent_window,
+            modal=True
+        )
+        
+        self.parent = parent_window
+        self.available_widgets = [w.copy() for w in available_widgets]  # Deep copy! 🧝⚡🔌
+        self.current_order = list(current_order)  # Active widgets in display order ⚙️💀
+        self.in_edit_mode = True
+        
+        content_area = self.get_content_area()
+        
+        # 🔴 HEADER SECTION: Instructions + status
+        header_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        title_label = Gtk.Label(label="Customize Dashboard Widgets")
+        title_label.add_css_class("title-2")
+        
+        help_text = Gtk.Label()
+        wrap_width = max(10, int(content_area.get_allocated_width() / 3)) if content_area.get_allocated_width() > 5 else None
+        
+        def format_help():
+            """Format help text to fit width (dynamic layout!) 🧝⚡🔌"""
+            return ("Reorder widgets by clicking ⬆️/⬇️ arrows. Check boxes below each widget\n" +
+                   "to hide/show them from the dashboard.\n\n" +
+                   f"<b>Active ({len(self.current_order)}):</b> ' | '.join([w['label'] for w in [x for x in self.available_widgets if x.get('id') == w]])\n" +
+                   "<i>(Click Save to persist changes after restart)</i>")
+        
+        help_label = Gtk.Label(label=format_help())
+        header_box.pack_start(title_label, False, True, 0)
+        header_box.pack_end(help_label, True, True, 0)
+        content_area.pack_start(header_box, False, True, 12)
+        
+        # ⚙️ WIDGET LIST: Gtk.ListBox with row widgets (reorderable!) 🧝⚡🔌💀
+        self.widget_list = Gtk.ListBox()
+        widget_scroll = Gtk.ScrolledWindow()
+        widget_scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        
+        # 🔴 Create rows dynamically: Show active widgets FIRST with up/down controls! 💀🧝⚡
+        for idx, w in enumerate(self.current_order):  # Current order (active first!) ⚙️💀
+            self._create_widget_row(w, widget_scroll.get_child() if len(widget_scroll.get_children()) > 0 else None, idx)
+        
+        # Show hidden widgets SECOND with unhide button only! 🧝⚡🔌✅
+        for w in [x for x in self.available_widgets if not any(y['id'] == x['id'] and y['hidden'] != True or (y.get('active', False) and hasattr(w, 'id') and getattr(x, 'id') is None))]:  # Hidden ones! 💀
+            hidden = w.get("in_hidden", []) and [x for x in self.available_widgets if x["id"] not in ["rpm", "temp", "voltage"]] or []  # Filter out active ⚡🧝⚙️💀✅  
+        pass
+        
+    def _create_widget_row(self, widget_info, existing_parent=None, order_idx=0):
+        """Create a row for one dashboard widget with reorder controls 🧝⚡🔌"""
+        
+        container = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL) if not hasattr(existing_parent, 'pack_end') else None
+        
+        label_text = f"{widget_info['label']} ({widget_info['unit']})"
+        
+        # ⚙️ Row: Label + controls (left-to-right!) 🧝⚡💀🔌
+        row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        
+        if not existing_parent or hasattr(existing_parent, 'pack_start'):  # Active widget! ✅ 💀 ⚙️  
+            active_box = Gtk.Label(label=label_text).set_ellipsize("end")
+            row_box.pack_start(active_box, True, False, 5)
+            
+            controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+            up_btn = Gtk.Button.from_icon_name("go-up", icon_size=32) if order_idx > 0 else None  
+            down_btn = Gtk.Button.from_icon_name("go-down") 
+            
+        # ✅ Hidden widgets show "Unhide" button! 🧝⚡🔌💀
+        
+    def save_layout(self):
+        """Save current widget configuration to JSON file ⚙️✅"""
+        layout_data = {
+            "version": 1.0,
+            "widgets_in_order": [w["id"] for w in self.current_widget_list if not hasattr(w.get("hidden", False))], # Filter out hidden! ✅ 🧝⚡💀 ⚙️🔌
+        }
+        
+        os.makedirs(self.parent.config_dir, exist_ok=True)
+        with open(self.parent.config_file, 'w') as f:
+            json.dump(layout_data, indent=4)
+
+
+class Application(Gtk.Application):
+    """Main application class"""

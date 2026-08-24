@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+"""OpenGonsult launcher - Nissan CONSULT-I diagnostic suite (RPM install)."""
+
+import sys
+
+APP_PATH = "/usr/share/opengonsult"
+APP_VERSION = "0.88"
+
+
+def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ("-v", "--version"):
+        print("OpenGonsult " + APP_VERSION)
+        return 0
+    if APP_PATH not in sys.path:
+        sys.path.insert(0, APP_PATH)
+    from gui.main_window import main as run_gui
+
+    return run_gui(sys.argv[1:])
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

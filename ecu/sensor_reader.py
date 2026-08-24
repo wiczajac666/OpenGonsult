@@ -1,5 +1,5 @@
 """
-OpenConsult - Real-time Sensor Reader for RPM, Temperature & Battery Voltage
+OpenGonsult - Real-time Sensor Reader for RPM, Temperature & Battery Voltage
 Enhanced module to support dashboard gauge displays in version 0.69+
 
 This module provides real-time sensor data reading and processing functionality
@@ -14,7 +14,7 @@ from enum import Enum
 
 
 class SensorType(Enum):
-    """Types of sensors supported by OpenConsult (v0.69+)"""
+    """Types of sensors supported by OpenGonsult (v0.69+)"""
     ENGINE_RPM = "engine_rpm"  # Engine revolutions per minute (0-8000 RPM)
     VEHICLE_SPEED = "vehicle_speed"  # Vehicle speed in km/h
     THROTTLE_POSITION = "throttle_position"  # Throttle position % 
@@ -46,9 +46,13 @@ class DashboardDataProcessor:
                        BATTERY_VOLTAGE (V) for automotive diagnostics dashboards.
     """
     
-    def __init__(self):
+    def __init__(self, graph_history_seconds: int = 120):
         self._readings: Dict[str, List[SensorReading]] = {}  # Rolling window per sensor
         self._window_size = 10
+        self._display_callbacks: List[Callable[[Dict[str, float]], None]] = []
+        # Rolling TIME-SERIES history per sensor for live line-graph rendering (v0.70)
+        self._history: Dict[str, List[tuple]] = {}  # key -> [(epoch_seconds, value), ...]
+        self._history_seconds = graph_history_seconds
         
         self.sensor_names = {
             "engine_rpm": {"name": "Engine RPM", "unit": "RPM"},
@@ -72,6 +76,31 @@ class DashboardDataProcessor:
         # Rolling window - keep only last N readings for stability
         while len(self._readings[key]) > self._window_size:
             self._readings[key].pop(0)
+
+        # Append to the time-series history buffer (for live line graphs)
+        if key not in self._history:
+            self._history[key] = []
+        self._history[key].append((reading.timestamp.timestamp(), reading.value))
+        self._trim_history(key)
+
+    def _trim_history(self, key: str):
+        """Drop history samples older than the configured window (keeps graph bounded)."""
+        bucket = self._history.get(key)
+        if not bucket:
+            return
+        cutoff = datetime.now().timestamp() - self._history_seconds
+        while bucket and bucket[0][0] < cutoff:
+            bucket.pop(0)
+
+    def get_history(self, sensor_type: str | SensorType) -> List[tuple]:
+        """Return a copy of the time-series history for a sensor: [(epoch, value), ...].
+
+        Used by the live line-graph renderer (v0.70). Empty list if no data yet."""
+        if isinstance(sensor_type, SensorType):
+            key = sensor_type.value
+        else:
+            key = str(sensor_type).lower()
+        return list(self._history.get(key, []))
 
     def get_current_value(self, sensor_type: str | SensorType) -> Optional[float]:
         """Get smoothed value of most recent reading
@@ -97,7 +126,7 @@ class DashboardDataProcessor:
 
     def register_display_callback(self, callback: Callable[[Dict[str, float]], None]):
         """Register UI update handler to receive real-time gauge updates (RPM/Temp/Voltage)."""
-        self._display_callbacks.append(callback if hasattr(self, '_display_callbacks') else [])
+        self._display_callbacks.append(callback)
 
 
-# Create the file in one shot with clean implementation - this version works for OpenConsult 0.69+ gauges display system integrating engine RPM monitoring & temperature/voltage dashboard widgets into GTK4 UI components.
+# Create the file in one shot with clean implementation - this version works for OpenGonsult 0.69+ gauges display system integrating engine RPM monitoring & temperature/voltage dashboard widgets into GTK4 UI components.

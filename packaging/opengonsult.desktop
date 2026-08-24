@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=OpenGonsult
+GenericName=Diagnostic Tool
+Comment=Nissan CONSULT-I diagnostic suite (14-pin connector)
+Exec=opengonsult
+TryExec=opengonsult
+Icon=opengonsult
+Terminal=false
+Type=Application
+Categories=Utility;Monitor;
+Keywords=Nissan;CONSULT;OBD;diagnostics;ECU;
+StartupNotify=true

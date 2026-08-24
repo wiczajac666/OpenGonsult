@@ -1,5 +1,5 @@
 """
-OpenConsult - ECU Database
+OpenGonsult - ECU Database
 Original open-source diagnostic tool for Nissan vehicles (14-pin connector)
 
 This module provides the ECU definitions, sensor tables, and DTC database.

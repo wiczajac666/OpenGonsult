@@ -1,7 +1,3 @@
-Yes. A multi-agent architecture is a good fit for a project of this size. I can't actually launch autonomous subagents that work in parallel over time within ChatGPT, but I can design a project that is intended to be executed by an external multi-agent framework (or by a human coordinating multiple coding agents).
-
-Here's a scalable architecture.
-
 # Project: OpenConsult
 
 **Goal**
@@ -18,8 +14,6 @@ Responsibilities:
 
 * maintain project state
 * assign tasks
-* detect merge conflicts
-* review pull requests
 * schedule work
 * run automated tests
 * generate releases
@@ -124,6 +118,8 @@ Settings
 
 Dialogs
 
+Error code reader
+
 Dark mode
 
 ---
@@ -147,16 +143,11 @@ themes
 Responsible for
 
 ```
-live graphs
-
+live graphs from car sensors
 zoom
-
 history
-
 recording
-
-playback
-
+playback (play,stop)
 CSV export
 ```
 
@@ -164,21 +155,14 @@ CSV export
 
 # Agent 6 — Serial Communication
 
-Works only on
 
 ```
 USB
-
 Bluetooth
-
 FTDI
-
 CH340
-
 PL2303
-
 device discovery
-
 hotplug
 ```
 
@@ -190,16 +174,11 @@ Produces
 
 ```
 CSV
-
 SQLite
-
 JSON
-
 session recording
-
 replay
 
-compression
 ```
 
 ---
@@ -210,15 +189,10 @@ Creates
 
 ```
 unit tests
-
 protocol tests
-
 GUI tests
-
 performance tests
-
 integration tests
-
 hardware simulation
 ```
 
@@ -230,15 +204,10 @@ Maintains
 
 ```
 README
-
 API docs
-
 User manual
-
 Developer guide
-
 Protocol specification
-
 Examples
 ```
 
@@ -250,11 +219,8 @@ Creates
 
 ```
 plugin API
-
 plugin loader
-
 plugin examples
-
 version compatibility
 ```
 
@@ -266,93 +232,13 @@ Produces
 
 ```
 Flatpak
-
 AppImage
-
 .deb
-
 RPM
-
-pip package
-
-Docker image
 ```
 
 ---
 
-# Agent 12 — Hardware Emulator
-
-Creates a simulated ECU.
-
-Allows development without a car.
-
-Supports
-
-```
-fake RPM
-
-fake TPS
-
-fake coolant temp
-
-inject DTCs
-
-replay logs
-
-timing simulation
-```
-
----
-
-# Agent 13 — CI/CD
-
-Maintains
-
-GitHub Actions
-
-Linting
-
-Formatting
-
-Coverage
-
-Nightly builds
-
-Release automation
-
----
-
-# Agent 14 — Performance
-
-Optimizes
-
-memory
-
-CPU
-
-graph rendering
-
-large logs
-
-serial throughput
-
----
-
-# Agent 15 — Security
-
-Checks
-
-unsafe plugins
-
-input validation
-
-malformed packets
-
-buffer safety
-
-dependency vulnerabilities
-
----
 
 # Repository Layout
 
@@ -462,12 +348,11 @@ No direct agent-to-agent writes are allowed.
 5. Live sensor streaming
 6. Basic GTK dashboard
 7. Graphing and logging
-8. DTC read/clear
+8. DTC read/clear (nissan trouble codes)
 9. Session recording and replay
 10. Plugin API
-11. Hardware emulator
 12. Documentation and packaging
-13. Version 1.0 release
+13. Version 0.88release
 
 This structure is well suited to orchestration frameworks such as OpenAI Codex, Claude Code, Aider, Roo Code, or similar systems where multiple coding agents can work concurrently under the supervision of an orchestrator that tracks task ownership, dependencies, progress, and integration.
 

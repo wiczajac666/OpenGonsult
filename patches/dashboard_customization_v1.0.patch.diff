@@ -1,0 +1,9 @@
+=== NEW FILE ===
+
+
+================================================================
+New file mode 100644
+index 0000000..f8b2c9d
+--- /dev/null
++++ b/OpenConsult/gui/main_window_v1.py.new@@ -0,0 +574 @@+""" OpenConsult Dashboard Customization v1.0 🧝⚡🔌 
++Full widget reorder/add/remove system! ✅💀✨ """

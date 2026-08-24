@@ -1,9 +1,9 @@
-# OpenGonsult v0.69+ 🧝✨📊⚡
+# OpenGonsult v0.88+ 🧝✨📊⚡
 
 > This is a **wibecoding test** for AI, it will most definetly not work (but somehow does?!) 😂💀
 
 ## Why the funny name?
-Because "OpenConsult" was too serious and we needed some chaotic vibes 🧝🔥
+Because "OpenGonsul" was too serious and we needed some chaotic vibes 🧝🔥
 *Also because goblin energy is superior to corporate software naming.* 👾✨
 
 ---
@@ -33,9 +33,9 @@ A bizzare collection of components trying to solve car diagnostics:
 
 ## Installation 🔧
 ```bash  
-debsum -i OpenGonsust_0.69+1ammy_amd64.deb # TODO: build it properly (we're still figuring this part out)
+debsum -i OpenGonsust_0.88+1ammy_amd64.deb # TODO: build it properly (we're still figuring this part out)
 pip3 install . or run ./scripts/install.sh if you feel lucky 🎲
-opengnsult --version  # should say v0.69+
+opengnsult --version  # should say v0.88+
 ```
 
 ## Features Showcase ⚡📊
@@ -62,7 +62,7 @@ opengonsult/
 │   ├── automatic calibration value fetching ⚙️
 │   └── temperature/voltage normalization formulas ✅
 ```
-**Version**: `OpenConsult v0.69+` (changelog in CHANGELOG.md)
+**Version**: `OpenGonsult v0.88+` (changelog in CHANGELOG.md)
 ---
 
 *Created by wiczajac666 for the chaos 🧝✨📊 - now with real sensor gauges!*

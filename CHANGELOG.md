@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to OpenConsult will be documented in this file.
+All notable changes to OpenGonsul will be documented in this file.
 
 ## [0.69] - 2024-07-25 🧝✨📊
 
