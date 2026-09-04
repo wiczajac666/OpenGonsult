@@ -33,7 +33,7 @@ A bizzare collection of components trying to solve car diagnostics:
 
 ## Installation 🔧
 ```bash  
-debsum -i OpenGonsust_0.88+1ammy_amd64.deb # TODO: build it properly (we're still figuring this part out)
+debsum -i OpenGonsult_0.88+1ammy_amd64.deb # TODO: build it properly (we're still figuring this part out)
 pip3 install . or run ./scripts/install.sh if you feel lucky 🎲
 opengnsult --version  # should say v0.88+
 ```
