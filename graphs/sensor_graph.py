@@ -8,19 +8,30 @@ Features:
 - Multiple sensor overlay with distinct colors
 - Mouse wheel zoom, click-drag pan
 - Auto-scroll window (configurable: 30s/60s/120s/300s)
-- Grid, axis labels, legend, dark light mode aware
-- PNG export via Record button
+- Grid, axis labels, legend, dark/light mode aware
+- PNG export, CSV export of the visible window
+- Session recording (CSV/SQLite/JSON) and playback via the sessionrec module
 """
 
 import math
 import json
 import os
 import time
+import csv
 from typing import Dict, List, Optional, Tuple, Set
 
 import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk, GLib, GdkPixbuf
+
+try:
+    from sessionrec.session_logger import SessionLogger
+    from sessionrec.replay import SessionReplayer
+    SESSION_REC_AVAILABLE = True
+except Exception:
+    SessionLogger = None
+    SessionReplayer = None
+    SESSION_REC_AVAILABLE = False
 
 
 # Sensor color palette (as specified in task)
@@ -58,6 +69,40 @@ SENSOR_UNITS = {
 }
 
 
+def plot_xy(
+    t: float,
+    v: float,
+    window_start: float,
+    window_seconds: float,
+    y_min: float,
+    y_max: float,
+    plot_x0: float,
+    plot_y0: float,
+    plot_width: float,
+    plot_height: float,
+) -> Tuple[float, float]:
+    """Map a time/value sample to Cairo pixel coordinates (y inverted).
+
+    Pure function, no GTK/cairo dependency, so the plotting math can be
+    unit-tested in isolation.
+    """
+    span = y_max - y_min
+    if span <= 0:
+        span = 1.0
+    if window_seconds <= 0:
+        window_seconds = 1.0
+
+    x_frac = (t - window_start) / window_seconds
+    y_frac = (v - y_min) / span
+    x = plot_x0 + x_frac * plot_width
+    # Cairo y grows downward, so invert.
+    y = plot_y0 + plot_height - y_frac * plot_height
+    # Clamp to the plot rectangle.
+    x = max(plot_x0, min(plot_x0 + plot_width, x))
+    y = max(plot_y0, min(plot_y0 + plot_height, y))
+    return x, y
+
+
 class SensorGraphWidget(Gtk.Box):
     """Main container widget for the sensor graph with controls."""
 
@@ -85,11 +130,74 @@ class SensorGraphWidget(Gtk.Box):
 
         toolbar.append(Gtk.Separator())
 
-        # Record button
+        # PNG export button
         record_btn = Gtk.Button.new_from_icon_name("document-save")
-        record_btn.set_label(" Record")
+        record_btn.set_label(" PNG")
+        record_btn.set_tooltip_text("Export the current graph to a PNG image")
         record_btn.connect("clicked", self._on_record_clicked)
         toolbar.append(record_btn)
+
+        # CSV export button
+        csv_btn = Gtk.Button.new_from_icon_name("document-save-as")
+        csv_btn.set_label(" CSV")
+        csv_btn.set_tooltip_text("Export the selected sensor data to a CSV file")
+        csv_btn.connect("clicked", self._on_export_csv)
+        toolbar.append(csv_btn)
+
+        toolbar.append(Gtk.Separator())
+
+        # Session recording controls
+        if SESSION_REC_AVAILABLE and data_processor is not None:
+            self.session_logger = SessionLogger(data_processor)
+            self._last_saved_path = ""
+        else:
+            self.session_logger = None
+            self._last_saved_path = ""
+
+        self.record_btn = Gtk.Button.new_from_icon_name("media-record")
+        self.record_btn.set_label(" Record")
+        self.record_btn.set_tooltip_text("Start/stop recording a diagnostic session")
+        self.record_btn.connect("clicked", self._on_record_session)
+        toolbar.append(self.record_btn)
+
+        self.rec_format_combo = Gtk.ComboBoxText.new()
+        self.rec_format_combo.append_text("CSV")
+        self.rec_format_combo.append_text("SQLite")
+        self.rec_format_combo.append_text("JSON")
+        self.rec_format_combo.set_active(0)
+        self.rec_format_combo.set_tooltip_text("Recorded session output format")
+        toolbar.append(self.rec_format_combo)
+
+        self.rec_status = Gtk.Label(label="Not recording")
+        toolbar.append(self.rec_status)
+
+        toolbar.append(Gtk.Separator())
+
+        # Session playback controls
+        if SESSION_REC_AVAILABLE and data_processor is not None:
+            self.replayer = SessionReplayer(data_processor)
+        else:
+            self.replayer = None
+
+        play_btn = Gtk.Button.new_from_icon_name("media-playback-start")
+        play_btn.set_label(" Play")
+        play_btn.set_tooltip_text("Open and play a recorded session")
+        play_btn.connect("clicked", self._on_open_session)
+        toolbar.append(play_btn)
+
+        self.play_pause_btn = Gtk.Button.new_from_icon_name("media-playback-pause")
+        self.play_pause_btn.set_label(" Pause")
+        self.play_pause_btn.set_tooltip_text("Play/pause playback")
+        self.play_pause_btn.set_sensitive(False)
+        self.play_pause_btn.connect("clicked", self._on_play_pause)
+        toolbar.append(self.play_pause_btn)
+
+        self.replay_stop_btn = Gtk.Button.new_from_icon_name("media-playback-stop")
+        self.replay_stop_btn.set_label(" Stop")
+        self.replay_stop_btn.set_tooltip_text("Stop playback")
+        self.replay_stop_btn.set_sensitive(False)
+        self.replay_stop_btn.connect("clicked", self._on_replay_stop)
+        toolbar.append(self.replay_stop_btn)
 
         toolbar.append(Gtk.Separator())
 
@@ -171,7 +279,12 @@ class SensorGraphWidget(Gtk.Box):
         return True
 
     def _on_timeout(self) -> bool:
-        """Trigger a redraw of the graph area every second."""
+        """Advance replay playback, refresh recording status, redraw."""
+        if self.replayer is not None and self.replayer.is_loaded and self.replayer.is_playing:
+            self.replayer.pump()
+            if not self.replayer.is_playing:
+                self._update_replay_state()
+        self._update_recording_status()
         self.graph_area.queue_draw()
         return True
 
@@ -227,6 +340,147 @@ class SensorGraphWidget(Gtk.Box):
             self._show_info(f"Graph saved to: {filename}")
         except Exception as e:
             self._show_error(f"Failed to save: {e}")
+
+    def _on_export_csv(self, button: Gtk.Button):
+        """Export the currently visible sensor data to a CSV file.
+
+        One column per enabled sensor; rows are aligned by timestamp.
+        Only sensors with data in the current time window are exported.
+        """
+        if not self.data_processor:
+            self._show_error("No sensor data available to export.")
+            return
+
+        now = time.time()
+        window_start = now - self.time_window_seconds
+
+        # Gather enabled sensors and their in-window history points.
+        series: Dict[str, List[Tuple[float, float]]] = {}
+        for key in SENSOR_COLORS:
+            if not self.checkboxes[key].get_active():
+                continue
+            history = self.data_processor.get_history(key)
+            points = [(t, v) for t, v in history if t >= window_start]
+            if points:
+                series[key] = points
+
+        if not series:
+            self._show_error("No data for the selected sensors in this window.")
+            return
+
+        filename = f"opengonsult_data_{int(time.time())}.csv"
+        try:
+            self._write_csv(filename, series)
+            self._show_info(f"Data exported to: {filename}")
+        except Exception as e:
+            self._show_error(f"Failed to export CSV: {e}")
+
+    def _write_csv(self, filename: str, series: Dict[str, List[Tuple[float, float]]]):
+        """Write sensor time-series data to a CSV file.
+
+        Columns: timestamp followed by one column per sensor. Rows with
+        no value for a sensor are left blank so all series share the same
+        time column while keeping their own sampling instants.
+        """
+        headers = ["timestamp"] + [SENSOR_LABELS[key] for key in series.keys()]
+        keys = list(series.keys())
+
+        # Union of all timestamps across enabled sensors, ascending.
+        all_times = sorted({t for pts in series.values() for t, _ in pts})
+        lookup = {}
+        for key in keys:
+            lookup[key] = {t: v for t, v in series[key]}
+
+        with open(filename, "w", newline="", encoding="utf-8") as fh:
+            writer = csv.writer(fh)
+            writer.writerow(headers)
+            for t in all_times:
+                row = [f"{t:.3f}"]
+                for key in keys:
+                    value = lookup[key].get(t)
+                    row.append("" if value is None else f"{value:.6g}")
+                writer.writerow(row)
+
+    # ---- session recording / playback handlers --------------------------
+
+    def _on_record_session(self, button: Gtk.Button):
+        """Start recording immediately, or stop and save the session."""
+        if self.session_logger is None:
+            self._show_error("Session recording module not available.")
+            return
+
+        if not self.session_logger.is_recording:
+            fmt_map = {"CSV": ".csv", "SQLite": ".sqlite", "JSON": ".json"}
+            ext = fmt_map.get(self.rec_format_combo.get_active_text(), ".csv")
+            path = f"opengonsult_session_{int(time.time())}{ext}"
+            self._last_saved_path = path
+            self.session_logger.start()
+            self.rec_status.set_markup("<span foreground='red'>● Recording...</span>")
+            self.record_btn.set_label(" Stop")
+            self.rec_format_combo.set_sensitive(False)
+        else:
+            self.session_logger.stop()
+            self._last_saved_path = self.session_logger.save(self._last_saved_path)
+            self.rec_status.set_text("Not recording")
+            self.record_btn.set_label(" Record")
+            self.rec_format_combo.set_sensitive(True)
+            self._show_info(f"Session saved: {self._last_saved_path}")
+
+    def _update_recording_status(self):
+        """Keep the recording UI in sync (used by the timeout tick)."""
+        if self.session_logger is not None and self.session_logger.is_recording:
+            self.record_btn.set_label(" Stop")
+            self.rec_status.set_markup("<span foreground='red'>● Recording...</span>")
+            self.rec_format_combo.set_sensitive(False)
+        else:
+            self.record_btn.set_label(" Record")
+            self.rec_status.set_text("Not recording")
+            self.rec_format_combo.set_sensitive(True)
+
+    def _on_open_session(self, button: Gtk.Button):
+        """Open a session file for playback."""
+        dialog = Gtk.FileDialog.new()
+        dialog.set_title("Open Diagnostic Session")
+        dialog.accept(self, self._on_session_loaded, None)
+        dialog.present(self.get_root())
+
+    def _on_session_loaded(self, dialog, result, _):
+        try:
+            file = dialog.get_future_file(self, result)
+            if file:
+                path = file.get_path()
+                self.replayer.load(path)
+                self._update_replay_state()
+                self._show_info(f"Loaded: {path}")
+        except Exception as e:
+            self._show_error(f"Failed to load session: {e}")
+
+    def _on_play_pause(self, button: Gtk.Button):
+        if self.replayer.is_playing:
+            self.replayer.pause()
+        else:
+            self.replayer.play()
+        self._update_replay_state()
+
+    def _on_replay_stop(self, button: Gtk.Button):
+        if self.replayer:
+            self.replayer.stop()
+        self._update_replay_state()
+
+    def _update_replay_state(self):
+        if self.replayer is None:
+            return
+
+        is_loaded = self.replayer.is_loaded
+        is_playing = self.replayer.is_playing
+
+        self.play_pause_btn.set_sensitive(is_loaded)
+        self.replay_stop_btn.set_sensitive(is_loaded)
+
+        if is_playing:
+            self.play_pause_btn.set_icon_name("media-playback-pause")
+        else:
+            self.play_pause_btn.set_icon_name("media-playback-start")
 
     def _show_error(self, message: str):
         dialog = Gtk.MessageDialog(
@@ -405,16 +659,29 @@ class SensorGraphWidget(Gtk.Box):
         cr.show_text(max_label)
 
         # --- X-axis time labels ---
-        mid_time = window_start + self.time_window_seconds / 2
-        mid_label = f"-{self.time_window_seconds / 2:.0f}s"
-        mid_ext = cr.text_extents(mid_label)
-        cr.move_to(plot_x0 + plot_width / 2 - mid_ext.width / 2, plot_y0 + plot_height + 18)
-        cr.show_text(mid_label)
-        # Time window label
-        window_label = f"Window: {self.time_window_seconds:.0f}s"
-        w_ext = cr.text_extents(window_label)
-        cr.move_to(plot_x0 + plot_width / 2 - w_ext.width / 2, plot_y0 + plot_height + 35)
-        cr.show_text(window_label)
+        cr.set_source_rgba(*text_color)
+        cr.select_font_face("sans-serif")
+        cr.set_font_size(11)
+
+        # Draw time ticks and labels
+        num_ticks = 5
+        for i in range(num_ticks + 1):
+            tick_time = window_start + (i / num_ticks) * self.time_window_seconds
+            tick_x = plot_x0 + (i / num_ticks) * plot_width
+
+            # Draw tick line
+            cr.move_to(tick_x, plot_y0 + plot_height)
+            cr.line_to(tick_x, plot_y0 + plot_height + 5)
+            cr.stroke()
+
+            # Draw label (e.g., "-60s", "-30s", "0s", etc.)
+            # Using a relative offset from 'now' for better UX
+            rel_time = tick_time - time.time()
+            label = f"{rel_time:+.0f}s" if abs(rel_time) > 1 else "now"
+
+            label_width = cr.text_extents(label).width
+            cr.move_to(tick_x - label_width / 2, plot_y0 + plot_height + 20)
+            cr.show_text(label)
 
         # --- Draw sensor data lines ---
         for key, points in sensor_data.items():
@@ -427,12 +694,18 @@ class SensorGraphWidget(Gtk.Box):
             cr.set_line_width(2.0 * self.zoom_level)
 
             for i, (t, v) in enumerate(points):
-                # Map time to x
-                x_frac = (t - window_start) / self.time_window_seconds
-                x = plot_x0 + x_frac * plot_width
-                # Map value to y (inverted — y is down in Cairo)
-                y_frac = (v - y_min) / (y_max - y_min)
-                y = plot_y0 + plot_height - y_frac * plot_height
+                x, y = plot_xy(
+                    t,
+                    v,
+                    window_start,
+                    self.time_window_seconds,
+                    y_min,
+                    y_max,
+                    plot_x0,
+                    plot_y0,
+                    plot_width,
+                    plot_height,
+                )
 
                 if i == 0:
                     cr.move_to(x, y)
