@@ -4,15 +4,15 @@
 import sys
 
 APP_PATH = "/usr/share/opengonsult"
-APP_VERSION = "0.88"
 
 
 def main():
-    if len(sys.argv) > 1 and sys.argv[1] in ("-v", "--version"):
-        print("OpenGonsult " + APP_VERSION)
-        return 0
     if APP_PATH not in sys.path:
         sys.path.insert(0, APP_PATH)
+    if len(sys.argv) > 1 and sys.argv[1] in ("-v", "--version"):
+        from gui import __version__
+        print("OpenGonsult " + __version__)
+        return 0
     from gui.main_window import main as run_gui
 
     return run_gui(sys.argv[1:])

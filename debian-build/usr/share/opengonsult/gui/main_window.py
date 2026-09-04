@@ -8,10 +8,11 @@ pages: Dashboard, Graphing, Error Codes, Settings and About. Configuration is
 persisted to ~/.config/opengonsult/config.json.
 
 Integration points:
-    ecu/sensor_reader.py  DashboardDataProcessor / SensorType / SensorReading
-    ecu/database.py       ECUDatabase sensor scaling + DTC translations
-    serial/adapter.py     SerialAdapter (asyncio) serial transport
-    protocol/consult.py   CONSULT-I packet framing and checksums
+    ecu/sensors.py       DashboardDataProcessor / SensorType / SensorReading
+    ecu/ecu_db.py        ECUDatabase sensor scaling + DTC translations
+    ecu/dtc.py           CONSULT-I single-byte DTC decoder + fault-code index
+    serial/adapter.py    SerialAdapter (asyncio) serial transport
+    protocol/consult.py  CONSULT-I packet framing and checksums
 """
 
 import asyncio
@@ -26,22 +27,32 @@ import time
 
 import cairo
 import gi
+gi.require_version('Gtk', '4.0')
+from gi.repository import Gio, Gtk, Gdk, GLib, Pango
 
-gi.require_version("Gtk", "4.0")
-gi.require_version("Pango", "1.0")
-from gi.repository import Gio, GLib, Gtk, Pango
+from dashboard.gauges import GaugeWidget
+from dashboard.simulator import SimulationEngine
 
 try:
-    from ecu.database import ECUDatabase
+    from ecu.ecu_db import ECUDatabase
 except ImportError:
     ECUDatabase = None
 
 try:
-    from ecu.sensor_reader import DashboardDataProcessor, SensorReading, SensorType
+    from ecu.sensors import DashboardDataProcessor, SensorReading, SensorType
 except ImportError:
     DashboardDataProcessor = None
     SensorReading = None
     SensorType = None
+
+try:
+    from ecu import dtc as dtc_module
+    _DECODE_DTC_CODES = dtc_module.decode_dtc_codes
+    _DTC_DESCRIBE = dtc_module.describe
+except ImportError:
+    dtc_module = None
+    _DECODE_DTC_CODES = None
+    _DTC_DESCRIBE = None
 
 try:
     from serial.adapter import SerialAdapter, SerialConfig
@@ -63,7 +74,7 @@ except ImportError:
 
 APP_ID = "org.opengonsult.OpenGonsult"
 APP_NAME = "OpenGonsult"
-APP_VERSION = "0.88"
+from gui import __version__ as APP_VERSION
 APP_DESCRIPTION = (
     "Open-source diagnostic suite for Nissan vehicles equipped with the "
     "CONSULT-I (14-pin) diagnostic interface. Reads live engine sensors, "
@@ -100,8 +111,8 @@ GAUGE_DIGITS = {
 
 CONSULT_ECU_ID = 1
 CONSULT_MODE_LIVE_DATA = 0x01
-CONSULT_CMD_DTC_READ = 0x0C
-CONSULT_CMD_DTC_CLEAR = 0x0D
+CONSULT_CMD_DTC_READ = 0xD1
+CONSULT_CMD_DTC_CLEAR = 0xC1
 SENSOR_COMMANDS = {
     "engine_rpm": 0x09,
     "coolant_temp": 0x0B,
@@ -276,17 +287,17 @@ class ConnectionWorker(threading.Thread):
         return physical
 
     def _decode_dtc_list(self, raw_bytes):
-        codes = []
-        if self._db is not None:
-            known = self._db.list_dtc_codes(CONSULT_ECU_ID)
-        else:
-            known = []
-        if raw_bytes and known:
-            for byte in bytes(raw_bytes)[1:]:
-                index = int(byte)
-                if 0 < index <= len(known):
-                    codes.append(known[index - 1])
-        return sorted(set(codes))
+        """Decode raw Consult DTC response bytes into display code strings.
+
+        Uses the real single-byte Consult format from ecu/dtc.py. Returns an
+        empty list when the decoder is unavailable or the payload is empty.
+        """
+        if _DECODE_DTC_CODES is None:
+            return []
+        try:
+            return _DECODE_DTC_CODES(raw_bytes or b"")
+        except Exception:
+            return []
 
 
 class GaugeWidget(Gtk.DrawingArea):
@@ -775,7 +786,7 @@ class MainWindow(Gtk.ApplicationWindow):
         if not self.require_connection_for_dtc():
             return
         if self.simulating or self.worker is None:
-            sample = ["P0420", "P0171"] if self.db is not None else []
+            sample = ["13", "08"] if (self.db is not None or dtc_module is not None) else []
             self.set_dtc_rows(sample)
             self.set_status("Simulated DTC scan complete.", "dialog-question-symbolic")
             return
@@ -1155,6 +1166,8 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def start_simulation(self):
         self.sim_start_time = time.time()
+        self.simulator = SimulationEngine(self.processor)
+        self.simulator.start()
         if not hasattr(self, "_sim_timer_id"):
             self._sim_timer_id = GLib.timeout_add(SIM_INTERVAL_MS, self.simulation_tick)
 
@@ -1163,49 +1176,16 @@ class MainWindow(Gtk.ApplicationWindow):
         if timer_id is not None:
             GLib.source_remove(timer_id)
             self._sim_timer_id = None
+        if hasattr(self, "simulator"):
+            self.simulator.stop()
+            del self.simulator
         self.sim_start_time = None
 
     def simulation_tick(self):
         if not self.simulating or self.processor is None:
             return True
-        elapsed = time.time() - (self.sim_start_time or time.time())
-        rev_band = abs(((elapsed % 26.0) / 26.0) * 2.0 - 1.0)
-        rpm = (
-            900.0
-            + 140.0 * (1.0 + (elapsed % 7.0) / 7.0)
-            + rev_band ** 5 * 4200.0
-            + random.gauss(0.0, 25.0)
-        )
-        rpm = max(0.0, rpm)
-        speed = max(0.0, min(130.0, rev_band ** 2 * 110.0 + random.gauss(0.0, 2.0)))
-        throttle = max(0.0, min(100.0, (rpm - 850.0) / 55.0 + random.gauss(0.0, 1.5)))
-        coolant = min(93.0, 22.0 + elapsed * 0.9) + random.gauss(0.0, 0.15)
-        voltage = 13.9 + 0.12 * ((elapsed % 5.0) / 5.0) + random.gauss(0.0, 0.03)
-        o2 = max(0.1, min(0.9, 0.5 + 0.35 * (elapsed % 1.2 > 0.6) + random.gauss(0.0, 0.02)))
-
-        samples = {
-            "engine_rpm": rpm,
-            "coolant_temp": coolant,
-            "battery_voltage": voltage,
-            "vehicle_speed": speed,
-            "throttle_position": throttle,
-            "oxygen_sensor": o2,
-        }
-        for key, value in samples.items():
-            sensor_type = None
-            if SensorType is not None:
-                try:
-                    sensor_type = SensorType[key.upper()]
-                except KeyError:
-                    sensor_type = None
-            if SensorReading is not None:
-                reading = SensorReading(
-                    sensor_type=sensor_type,
-                    value=float(value),
-                    unit=SENSOR_UNITS.get(key, ""),
-                    raw_value=int(round(value)),
-                )
-                self.processor.add_reading(key, reading)
+        if hasattr(self, "simulator") and self.simulator:
+            self.simulator.tick()
         return True
 
     # ------------------------------------------------------------------

@@ -1,12 +1,25 @@
 """Graph Core Module - Node, Edge, and DirectedGraph data structures."""
 
 import json
+from typing import Any, Dict, List, Optional, Union
+
+
+def _extract_id(node_id: Any):
+    """Extract a node ID from a Node object or pass through directly.
+
+    Handles Node objects, bare IDs (int/str), and other types.
+    This ensures all graph methods operate on the same ID type consistently
+    so that add/remove/lookup by ID are symmetric.
+    """
+    if hasattr(node_id, "id"):
+        return node_id.id
+    return node_id
 
 
 class Node:
     """A graph node representing an entity."""
 
-    def __init__(self, id_, properties=None):
+    def __init__(self, id_: Any, properties: Optional[Dict[str, Any]] = None):
         if isinstance(id_, Node):
             self.id = id_.id
             self.properties = dict(id_.properties) if id_.properties else {}
@@ -14,10 +27,10 @@ class Node:
             self.id = 0
             self.properties = properties or {}
         elif isinstance(id_, str):
-            self.id = id_  # keep as string (algorithms use string IDs)
+            self.id = id_
             self.properties = properties or {}
         else:
-            self.id = int(id_)
+            self.id = id_
             self.properties = properties or {}
 
     def __repr__(self):
@@ -36,16 +49,12 @@ class Node:
 class Edge:
     """An edge connecting two nodes in a graph."""
 
-    def __init__(self, source, target, properties=None):
+    def __init__(self, source, target, properties: Optional[Dict[str, Any]] = None):
         if isinstance(source, Node):
             source = source.id
-        elif not isinstance(source, str):
-            source = str(int(source))
         self.source = source
         if isinstance(target, Node):
             target = target.id
-        elif not isinstance(target, str):
-            target = str(int(target))
         self.target = target
         self.properties = properties or {}
         self.weight = self.properties.get("weight", 1.0)
@@ -70,17 +79,20 @@ class DirectedGraph:
 
     def __init__(self, name=""):
         self.name = name
-        self._nodes = {}          # id -> Node
-        self._edges = []          # list of Edge objects
-        self._adjacency = {}      # source_id -> [target_id, ...]
-        self._reverse_adj = {}    # target_id -> [source_id, ...]
+        self._nodes = {}
+        self._edges = []
+        self._adjacency = {}
+        self._reverse_adj = {}
 
     # ---- node management ----
 
-    def add_node(self, node):
+    def add_node(self, node, properties=None):
         """Add a node to the graph. If it already exists, updates its properties."""
-        if isinstance(node, int):
-            node = Node(node)
+        if not isinstance(node, Node):
+            if properties is not None:
+                node = Node(node, properties)
+            else:
+                node = Node(node)
         self._nodes[node.id] = node
         if node.id not in self._adjacency:
             self._adjacency[node.id] = []
@@ -88,7 +100,7 @@ class DirectedGraph:
 
     def remove_node(self, node_id):
         """Remove a node and all its incident edges."""
-        node_id = int(node_id)
+        node_id = _extract_id(node_id)
         if node_id not in self._nodes:
             return False
         del self._nodes[node_id]
@@ -102,23 +114,37 @@ class DirectedGraph:
         return True
 
     def has_node(self, node_id):
-        n = node_id.id if isinstance(node_id, Node) else node_id
+        n = _extract_id(node_id)
         return n in self._nodes
 
     def get_node(self, node_id):
-        n = node_id.id if isinstance(node_id, Node) else node_id
+        n = _extract_id(node_id)
         return self._nodes.get(n)
+
+    def degree(self, node_id):
+        """Return the degree of a node (total out + in neighbors)."""
+        node_id = _extract_id(node_id)
+        out = len(self._adjacency.get(node_id, []))
+        inp = len(self._reverse_adj.get(node_id, []))
+        return out + inp
 
     # ---- edge management ----
 
     def add_edge(self, source, target, properties=None):
         """Add a directed edge from source to target."""
-        src_id = source.id if isinstance(source, Node) else int(source)
-        tgt_id = target.id if isinstance(target, Node) else int(target)
+        src_id = _extract_id(source)
+        tgt_id = _extract_id(target)
         if not self.has_node(src_id):
-            self.add_node(source)
+            # Auto-create if bare ID passed
+            if isinstance(source, Node):
+                self.add_node(source)
+            else:
+                self.add_node(Node(src_id))
         if not self.has_node(tgt_id):
-            self.add_node(target)
+            if isinstance(target, Node):
+                self.add_node(target)
+            else:
+                self.add_node(Node(tgt_id))
 
         edge = Edge(src_id, tgt_id, properties)
         self._edges.append(edge)
@@ -129,8 +155,8 @@ class DirectedGraph:
 
     def remove_edge(self, source, target):
         """Remove a directed edge from source to target."""
-        src_id = source.id if isinstance(source, Node) else int(source)
-        tgt_id = target.id if isinstance(target, Node) else int(target)
+        src_id = _extract_id(source)
+        tgt_id = _extract_id(target)
         self._edges = [e for e in self._edges if not (e.source == src_id and e.target == tgt_id)]
         if tgt_id in self._adjacency.get(src_id, []):
             self._adjacency[src_id].remove(tgt_id)
@@ -138,9 +164,9 @@ class DirectedGraph:
             self._reverse_adj[tgt_id].remove(src_id)
 
     def has_edge(self, source, target):
-        src_id = source.id if isinstance(source, Node) else int(source)
-        tgt_id = target.id if isinstance(target, Node) else int(target)
-        return tgt_id in (self._adjacency.get(src_id, []))
+        src_id = _extract_id(source)
+        tgt_id = _extract_id(target)
+        return tgt_id in self._adjacency.get(src_id, [])
 
     def get_edges(self):
         """Return a list of all Edge objects."""
@@ -149,9 +175,11 @@ class DirectedGraph:
     # ---- queries ----
 
     def get_neighbors(self, node_id, direction="out"):
-        """Return neighbor node IDs.
-        direction: 'out' (default), 'in', or 'both'."""
-        node_id = int(node_id)
+        """Return neighbor IDs.
+
+        direction: 'out' (default), 'in', or 'both'.
+        """
+        node_id = _extract_id(node_id)
         if direction == "out":
             return list(self._adjacency.get(node_id, []))
         elif direction == "in":
@@ -178,7 +206,7 @@ class DirectedGraph:
     # ---- iteration helpers ----
 
     def __contains__(self, node_id):
-        return int(node_id) in self._nodes
+        return _extract_id(node_id) in self._nodes
 
     def __iter__(self):
         return iter(self._nodes.values())

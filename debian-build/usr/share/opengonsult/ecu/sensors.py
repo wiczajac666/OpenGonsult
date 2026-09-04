@@ -7,6 +7,7 @@ integrating with ECU communication protocols to decode engine performance metric
 """
 
 import asyncio
+import time
 from typing import Dict, Optional, Callable, List
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -53,12 +54,28 @@ class DashboardDataProcessor:
         # Rolling TIME-SERIES history per sensor for live line-graph rendering (v0.70)
         self._history: Dict[str, List[tuple]] = {}  # key -> [(epoch_seconds, value), ...]
         self._history_seconds = graph_history_seconds
-        
+        # Observers receive (key, epoch_seconds, value) per reading (v0.88 logging)
+        self._observers: List[Callable[[str, float, float], None]] = []
+
         self.sensor_names = {
             "engine_rpm": {"name": "Engine RPM", "unit": "RPM"},
             "coolant_temp": {"name": "Coolant Temp", "unit": "°C"}, 
             "battery_voltage": {"name": "Battery Voltage", "unit": "V"},
         }
+
+    def subscribe(self, callback: Callable[[str, float, float], None]) -> None:
+        """Register a callback invoked for every reading: fn(key, epoch_seconds, value).
+
+        Used by the session logger to capture raw samples regardless of source
+        (simulation or live ECU). Callbacks are best-effort; exceptions do not
+        propagate to the caller.
+        """
+        if callback not in self._observers:
+            self._observers.append(callback)
+
+    def unsubscribe(self, callback: Callable[[str, float, float], None]) -> None:
+        if callback in self._observers:
+            self._observers.remove(callback)
 
     def add_reading(self, sensor_type: str | SensorType, reading: SensorReading):
         """Add a new sensor reading to the processor"""
@@ -80,8 +97,17 @@ class DashboardDataProcessor:
         # Append to the time-series history buffer (for live line graphs)
         if key not in self._history:
             self._history[key] = []
-        self._history[key].append((reading.timestamp.timestamp(), reading.value))
+        
+        ts = reading.timestamp.timestamp() if reading.timestamp else time.time()
+        self._history[key].append((ts, reading.value))
         self._trim_history(key)
+
+        # Notify observers (session logging) of the raw sample.
+        for callback in list(self._observers):
+            try:
+                callback(key, ts, reading.value)
+            except Exception:
+                pass
 
     def _trim_history(self, key: str):
         """Drop history samples older than the configured window (keeps graph bounded)."""
@@ -120,7 +146,7 @@ class DashboardDataProcessor:
             return None
             
         # Last 5 samples for smooth gauge updates (avoids jitter from single readings)
-        values = [r.value for r in readings_list[:min(5, len(readings_list))]]
+        values = [r.value for r in readings_list[-min(5, len(readings_list)):]]
         
         return sum(values) / len(values)
 

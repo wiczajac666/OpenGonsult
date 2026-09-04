@@ -15,8 +15,8 @@ Version: 2.0 (Enhanced Security & Reliability)
 import struct
 import time
 import hashlib
-import secrets
 import random
+import secrets
 from typing import List, Optional, Tuple, Dict, Any
 from dataclasses import dataclass, field
 from enum import Enum
@@ -184,7 +184,7 @@ class ConsultPacket:
     
     def __post_init__(self):
         if self.framed_frame is None:
-            self.framed_frame = FramedFrame(payload=self.payload, signature=secrets.token_hex(16))
+            self.framed_frame = FramedFrame(payload=self.payload, signature='')
     
     @property
     def timestamp(self) -> float:
@@ -223,7 +223,6 @@ class RequestPacket(ConsultPacket):
         # Update framed frame for proper framing (FIX #1-5 integrated)
         self.framed_frame = FramedFrame(
             payload=payload, 
-            signature=secrets.token_hex(16),
             timestamp=time.time()  # FIX #1: Fresh timestamp added automatically
         )
         
@@ -331,8 +330,6 @@ class RetryController:
     def should_retry(self) -> bool:
         """Check if we can still retry (FIX #2 - configured max retries)."""
         
-        self.attempt_count += 1
-        
         return self.attempt_count < self.config.max_retries
 
 
@@ -359,7 +356,7 @@ def validate_packet(packet_data: bytes, timestamp_cache: Dict[str, float] = None
         return expected_checksum == actual_checksum
         
     except Exception as e:
-        print(f"Packet validation failed: {e}")
+        logger.warning(f"Packet validation failed: {e}")
         return False
 
 
