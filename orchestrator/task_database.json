@@ -1,7 +1,7 @@
 {
   "project": "OpenGonsult",
   "version": "0.88",
-  "last_updated": "2026-09-03",
+  "last_updated": "2026-09-05",
   "minions": [
     {
       "name": "Kevin",
@@ -120,8 +120,8 @@
     },
     "11_documentation_packaging": {
       "name": "Documentation and packaging",
-      "status": "in_progress",
-      "progress": 60
+      "status": "completed",
+      "progress": 100
     },
     "12_v088_release": {
       "name": "Version 0.88 release",
@@ -269,9 +269,9 @@
       "task": "Update documentation: README, API docs, user manual",
       "owner": "Dave",
       "priority": "Medium",
-      "status": "pending",
+      "status": "completed",
       "depends_on": [],
-      "progress": 0,
+      "progress": 100,
       "module": "docs/",
       "description": "Update README with current features, write API docs, user manual, protocol specification."
     },
