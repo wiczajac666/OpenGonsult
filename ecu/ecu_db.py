@@ -5,7 +5,7 @@ Original open-source diagnostic tool for Nissan vehicles (14-pin connector)
 This module provides the ECU definitions, sensor tables, and DTC database.
 """
 
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from dataclasses import dataclass
 
 

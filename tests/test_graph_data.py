@@ -1,5 +1,4 @@
 import unittest
-import time
 from ecu.sensors import DashboardDataProcessor, SensorReading, SensorType
 
 class TestGraphData(unittest.TestCase):
@@ -10,8 +9,7 @@ class TestGraphData(unittest.TestCase):
     def test_history_buffer_accumulation(self):
         """Verify that readings are correctly added to the time-series history buffer."""
         sensor = SensorType.ENGINE_RPM
-        now = time.time()
-        
+
         # Add 5 readings
         for i in range(5):
             reading = SensorReading(

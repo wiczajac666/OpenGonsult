@@ -1,10 +1,9 @@
-import math
 import random
 import time
-from typing import Dict, Any, Optional, TYPE_CHECKING
+from typing import Dict, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ecu.sensors import DashboardDataProcessor, SensorReading, SensorType
+    pass
 
 # Constants for simulation
 SIM_INTERVAL_MS = 200

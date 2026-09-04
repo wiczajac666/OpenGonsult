@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, "0.88"]
+  pull_request:
+    branches: [main, master, "0.88"]
+
+jobs:
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        run: python -m pip install ruff
+      - name: Run ruff check
+        run: ruff check .
+
+  test:
+    name: Tests (unit, GTK4 headless)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install GTK4 + PyGObject + cairo + serial deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            gir1.2-gtk-4.0 python3-gi python3-gi-cairo python3-cairo \
+            python3-serial gir1.2-gdkpixbuf-2.0 xvfb
+      - name: Run unit tests (headless)
+        run: xvfb-run -a python3 -m unittest discover -s tests -v
+
+  build:
+    name: Build (sdist + wheel)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install build
+        run: python -m pip install build
+      - name: Build sdist and wheel
+        run: python -m build
+      - name: Verify wheel metadata
+        run: python -c "import zipfile; z=zipfile.ZipFile([f for f in __import__('glob').glob('dist/*.whl')][0]); names=z.namelist(); assert any(n.startswith('gui/') for n in names), 'gui package missing'; print('wheel OK:', sum(1 for n in names if n.endswith('.py')), 'py modules')"

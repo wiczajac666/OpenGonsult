@@ -1,7 +1,4 @@
 import unittest
-import os
-import time
-import subprocess
 from unittest.mock import MagicMock
 
 # Mocking GTK/Gdk before importing anything else

@@ -2,7 +2,6 @@ import os
 import json
 import sqlite3
 import tempfile
-import time
 import unittest
 
 from ecu.sensors import DashboardDataProcessor, SensorReading, SensorType

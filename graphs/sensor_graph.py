@@ -13,16 +13,15 @@ Features:
 - Session recording (CSV/SQLite/JSON) and playback via the sessionrec module
 """
 
-import math
 import json
 import os
 import time
 import csv
-from typing import Dict, List, Optional, Tuple, Set
+from typing import Dict, List, Optional, Tuple
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gdk, GLib, GdkPixbuf
+from gi.repository import Gtk, Gdk, GLib
 
 try:
     from sessionrec.session_logger import SessionLogger

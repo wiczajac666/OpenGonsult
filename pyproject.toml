@@ -42,3 +42,25 @@ packages = [
 
 [tool.setuptools.dynamic]
 version = { attr = "gui.__version__" }
+
+[tool.ruff]
+target-version = "py38"
+line-length = 100
+# debian-build is a packaging staging tree mirrored from live source; it is
+# not linted directly (it duplicates the packages under test/lint).
+extend-exclude = ["debian-build/", "orchestrator/", "docs/", "examples/"]
+
+[tool.ruff.lint]
+# Bug-risk rules: pycodestyle errors (E4/E7/E9) + pyflakes (F).
+select = ["E4", "E7", "E9", "F"]
+
+# E402 is intended/wanted here: gi.require_version() must run before the
+# gi.repository import, and the version import intentionally sits among
+# module constants (PYTHONPATH-based dev layout).
+[tool.ruff.lint.per-file-ignores]
+"dashboard/gauges.py" = ["E402"]
+"graphs/sensor_graph.py" = ["E402"]
+"gui/main_window.py" = ["E402"]
+# Tests must inject sys.path and mock gi/cairo before importing the modules
+# under test, so module-level imports intentionally sit below that setup.
+"tests/*" = ["E402"]

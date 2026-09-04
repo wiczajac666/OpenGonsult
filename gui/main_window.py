@@ -21,16 +21,14 @@ import json
 import math
 import os
 import queue as thread_queue
-import random
 import threading
 import time
 
 import cairo
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gio, Gtk, Gdk, GLib, Pango
+from gi.repository import Gio, Gtk, GLib, Pango
 
-from dashboard.gauges import GaugeWidget
 from dashboard.simulator import SimulationEngine
 
 try:

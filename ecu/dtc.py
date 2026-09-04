@@ -16,7 +16,7 @@ a small "DTC Index" of common Nissan fault codes mapped to descriptions, so
 raw numeric codes can be translated for the Diagnostics page.
 """
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 # Sentinel marking "no fault" (and used as padding).
 NO_FAULT = 0x55

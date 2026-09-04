@@ -4,7 +4,6 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ecu import dtc
 from ecu.dtc import Fault, NO_FAULT, FRAME_START, decode_faults, decode_dtc_codes, describe
 from ecu.ecu_db import ECUDatabase
 
