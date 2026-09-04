@@ -4,14 +4,21 @@
       "name": "Kevin",
       "role": "Orchestrator/Project Manager",
       "agent_id": "orchestrator-agent-1",
-      "responsibilities": ["maintain project state", "assign tasks", "schedule work"],
+      "responsibilities": [
+        "maintain project state",
+        "assign tasks",
+        "schedule work"
+      ],
       "banana_consumption_rate": "infinite"
     },
     {
       "name": "Stuart",
       "role": "Agent 3 (GUI)",
       "agent_id": "gui-agent-1",
-      "responsibilities": ["GTK4 dashboard", "dark mode settings window"],
+      "responsibilities": [
+        "GTK4 dashboard",
+        "dark mode settings window"
+      ],
       "banana_consumption_rate": "~80/day",
       "status": "active"
     },
@@ -19,7 +26,10 @@
       "name": "Dave",
       "role": "Agent 9 (Documentation)",
       "agent_id": "docs-agent-1",
-      "responsibilities": ["README maintenance", "API documentation"],
+      "responsibilities": [
+        "README maintenance",
+        "API documentation"
+      ],
       "banana_consumption_rate": "~65/day",
       "status": "active"
     },
@@ -27,7 +37,10 @@
       "name": "Bob",
       "role": "Agent 2 (ECU Database)",
       "agent_id": "ecu-agent-1",
-      "responsibilities": ["sensor tables", "DTC database"],
+      "responsibilities": [
+        "sensor tables",
+        "DTC database"
+      ],
       "banana_consumption_rate": "~850/day",
       "status": "active"
     },
@@ -35,7 +48,9 @@
       "name": "Carl",
       "role": "Agent 6 (Serial Communication)",
       "agent_id": "serial-agent-1",
-      "responsibilities": ["USB/Bluetooth/Ftdi control"],
+      "responsibilities": [
+        "USB/Bluetooth/Ftdi control"
+      ],
       "banana_consumption_rate": "~390/day",
       "status": "active"
     },
@@ -43,7 +58,9 @@
       "name": "Neil",
       "role": "Agent 4 (Dashboard)",
       "agent_id": "dashboard-agent-1",
-      "responsibilities": ["gauges and custom widgets"],
+      "responsibilities": [
+        "gauges and custom widgets"
+      ],
       "banana_consumption_rate": "~312/day",
       "status": "active"
     },
@@ -51,7 +68,11 @@
       "name": "Marcus",
       "role": "Agent 5 (Graphing)",
       "agent_id": "graph-agent-1",
-      "responsibilities": ["live sensor streaming from car", "line graph rendering", "zoom/history/CSV export"],
+      "responsibilities": [
+        "live sensor streaming from car",
+        "line graph rendering",
+        "zoom/history/CSV export"
+      ],
       "banana_consumption_rate": "~201/day",
       "status": "active"
     },
@@ -59,7 +80,11 @@
       "name": "Timothy",
       "role": "Agent 7 (Logging)",
       "agent_id": "log-agent-1",
-      "responsibilities": ["CSV/SQLite recording", "session recording", "replay"],
+      "responsibilities": [
+        "CSV/SQLite recording",
+        "session recording",
+        "replay"
+      ],
       "banana_consumption_rate": "~156/day",
       "status": "pending"
     },
@@ -67,7 +92,9 @@
       "name": "Otto",
       "role": "Agent 8 (Testing)",
       "agent_id": "test-agent-1",
-      "responsibilities": ["unit tests for everything"],
+      "responsibilities": [
+        "unit tests for everything"
+      ],
       "banana_consumption_rate": "~89/day",
       "status": "pending"
     }
@@ -82,7 +109,13 @@
       "status": "pending",
       "depends_on": [],
       "description": "Wire up graphs/live_graph.py to sensor_reader history. Draw time-series line graphs on Gtk.DrawingArea using Cairo. Support multiple sensors, zoom, pan, and sensor selection dropdown.",
-      "acceptance_criteria": ["Graph appears on Graphs tab", "RPM/temp/voltage selectable", "Live updates at 1Hz", "Zoom/pan works", "CSV export button"],
+      "acceptance_criteria": [
+        "Graph appears on Graphs tab",
+        "RPM/temp/voltage selectable",
+        "Live updates at 1Hz",
+        "Zoom/pan works",
+        "CSV export button"
+      ],
       "model_override": "openrouter/poolside/laguna-s-2.1:free"
     },
     {
@@ -91,10 +124,17 @@
       "owner": "Timothy",
       "agent_id": "log-agent-1",
       "priority": "Medium",
-      "status": "pending",
-      "depends_on": ["TASK-001"],
-      "description": "Create logging/ module with CSV and SQLite recording. Record sensor data with timestamps. Add playback UI with play/stop/seek controls.",
-      "acceptance_criteria": ["Session recording starts/stops", "CSV export works", "SQLite storage", "Playback with timeline"],
+      "status": "done",
+      "depends_on": [
+        "TASK-001"
+      ],
+      "description": "sessionrec/ package: SessionLogger, CSV/SQLite/JSON writers, SessionReplayer with play/pause/stop/seek. Integrated record/playback controls into graphing toolbar. Package named sessionrec/ to avoid shadowing stdlib logging.",
+      "acceptance_criteria": [
+        "Session recording starts/stops",
+        "CSV export works",
+        "SQLite storage",
+        "Playback with timeline"
+      ],
       "model_override": "openrouter/poolside/laguna-s-2.1:free"
     },
     {
@@ -104,9 +144,18 @@
       "agent_id": "test-agent-1",
       "priority": "Medium",
       "status": "pending",
-      "depends_on": ["TASK-001", "TASK-002"],
+      "depends_on": [
+        "TASK-001",
+        "TASK-002"
+      ],
       "description": "Create comprehensive unit tests for protocol, serial, ecu, gui, graphs, and logging modules. Use pytest.",
-      "acceptance_criteria": ["Tests pass with pytest", "Coverage > 60%", "Protocol packet tests", "Graph data tests", "GUI widget tests"],
+      "acceptance_criteria": [
+        "Tests pass with pytest",
+        "Coverage > 60%",
+        "Protocol packet tests",
+        "Graph data tests",
+        "GUI widget tests"
+      ],
       "model_override": "openrouter/poolside/laguna-s-2.1:free"
     },
     {
@@ -117,8 +166,13 @@
       "priority": "Low",
       "status": "pending",
       "depends_on": [],
-      "description": "Fix README typo (OpenGonsust -> OpenGonsult), update debian/control version, rebuild .deb, create proper install script.",
-      "acceptance_criteria": ["README typo fixed", "debian/control correct", "deb builds", "opengonsult command works"],
+      "description": "Fix README typo (OpenGonsult -> OpenGonsult), update debian/control version, rebuild .deb, create proper install script.",
+      "acceptance_criteria": [
+        "README typo fixed",
+        "debian/control correct",
+        "deb builds",
+        "opengonsult command works"
+      ],
       "model_override": "openrouter/poolside/laguna-s-2.1:free"
     },
     {
@@ -130,7 +184,11 @@
       "status": "pending",
       "depends_on": [],
       "description": "Remove all backup files, temp scripts, __pycache__, gtk_viewer_*.py, adapter_*_*.py, verify_fixes*.py, test_*.py (except tests/). Add .gitignore.",
-      "acceptance_criteria": ["No backup files in git", "Clean .gitignore", "git status shows clean working tree"],
+      "acceptance_criteria": [
+        "No backup files in git",
+        "Clean .gitignore",
+        "git status shows clean working tree"
+      ],
       "model_override": "openrouter/poolside/laguna-s-2.1:free"
     },
     {
@@ -140,26 +198,80 @@
       "agent_id": "dashboard-agent-1",
       "priority": "Low",
       "status": "pending",
-      "depends_on": ["TASK-001"],
+      "depends_on": [
+        "TASK-001"
+      ],
       "description": "Make the Customize Dashboard dialog functional. Allow reordering/removing gauges, save preferences to config.",
-      "acceptance_criteria": ["Gauge reordering works", "Add/remove gauges", "Preferences persist"],
+      "acceptance_criteria": [
+        "Gauge reordering works",
+        "Add/remove gauges",
+        "Preferences persist"
+      ],
       "model_override": "openrouter/poolside/laguna-s-2.1:free"
     }
   ],
   "milestones": [
-    {"id": 1, "name": "Repository and CI setup", "status": "in_progress"},
-    {"id": 2, "name": "Serial communication", "status": "completed"},
-    {"id": 3, "name": "CONSULT-I protocol implementation", "status": "completed"},
-    {"id": 4, "name": "ECU discovery", "status": "completed"},
-    {"id": 5, "name": "Live sensor streaming", "status": "completed"},
-    {"id": 6, "name": "Basic GTK dashboard", "status": "completed"},
-    {"id": 7, "name": "Graphing and logging", "status": "in_progress"},
-    {"id": 8, "name": "DTC read/clear (nissan trouble codes)", "status": "completed"},
-    {"id": 9, "name": "Session recording and replay", "status": "pending"},
-    {"id": 10, "name": "Plugin API", "status": "pending"},
-    {"id": 11, "name": "Documentation and packaging", "status": "in_progress"},
-    {"id": 12, "name": "Version 0.88 release", "status": "pending"}
+    {
+      "id": 1,
+      "name": "Repository and CI setup",
+      "status": "in_progress"
+    },
+    {
+      "id": 2,
+      "name": "Serial communication",
+      "status": "completed"
+    },
+    {
+      "id": 3,
+      "name": "CONSULT-I protocol implementation",
+      "status": "completed"
+    },
+    {
+      "id": 4,
+      "name": "ECU discovery",
+      "status": "completed"
+    },
+    {
+      "id": 5,
+      "name": "Live sensor streaming",
+      "status": "completed"
+    },
+    {
+      "id": 6,
+      "name": "Basic GTK dashboard",
+      "status": "completed"
+    },
+    {
+      "id": 7,
+      "name": "Graphing and logging",
+      "status": "completed"
+    },
+    {
+      "id": 8,
+      "name": "DTC read/clear (nissan trouble codes)",
+      "status": "completed"
+    },
+    {
+      "id": 9,
+      "name": "Session recording and replay",
+      "status": "completed"
+    },
+    {
+      "id": 10,
+      "name": "Plugin API",
+      "status": "pending"
+    },
+    {
+      "id": 11,
+      "name": "Documentation and packaging",
+      "status": "in_progress"
+    },
+    {
+      "id": 12,
+      "name": "Version 0.88 release",
+      "status": "in_progress"
+    }
   ],
   "sprint": "sprint-003-graphing-logging",
-  "last_updated": "2026-08-18T11:45:00Z"
+  "last_updated": "2026-09-03T00:00:00Z"
 }

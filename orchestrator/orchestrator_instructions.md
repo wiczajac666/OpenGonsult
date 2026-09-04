@@ -19,7 +19,8 @@ Responsibilities:
 * generate releases
 * monitor coverage
 * maintain documentation
-* ensure coding standards
+* ensure coding standard
+* ensure that only one sub agent is running at a time.
 
 Maintains a project database containing:
 
@@ -105,6 +106,10 @@ gui/
 ```
 
 GTK4 only
+
+full Wayland support
+
+Gnome Desktop icon
 
 Responsibilities
 
@@ -221,6 +226,7 @@ Examples
 Produces
 
 ```
+Flatpak
 .deb
 RPM
 ```
@@ -351,6 +357,7 @@ launch command on linux terminal should be opengonsult
 
 GTK4 window title: OpenGonsult <version>
 GUI navigation panel left side ( like gnome settings window )
+Gnome desktop icon OpenGonsult.png
 
 Window list:
 1. Dashboard 

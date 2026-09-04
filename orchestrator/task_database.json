@@ -1,47 +1,317 @@
 {
   "project": "OpenGonsult",
   "version": "0.88",
-  "last_updated": "2026-08-18T11:45:00Z",
+  "last_updated": "2026-09-03",
   "minions": [
-    {"name": "Kevin", "role": "Orchestrator/PM", "agent_id": "orchestrator-agent-1", "banana_rate": "infinite", "status": "active"},
-    {"name": "Stuart", "role": "Agent 3 (GUI)", "agent_id": "gui-agent-1", "banana_rate": "~80/day", "status": "active"},
-    {"name": "Dave", "role": "Agent 9 (Docs)", "agent_id": "docs-agent-1", "banana_rate": "~65/day", "status": "active"},
-    {"name": "Bob", "role": "Agent 2 (ECU)", "agent_id": "ecu-agent-1", "banana_rate": "~850/day", "status": "active"},
-    {"name": "Carl", "role": "Agent 6 (Serial)", "agent_id": "serial-agent-1", "banana_rate": "~390/day", "status": "active"},
-    {"name": "Neil", "role": "Agent 4 (Dashboard)", "agent_id": "dashboard-agent-1", "banana_rate": "~312/day", "status": "active"},
-    {"name": "Marcus", "role": "Agent 5 (Graphing)", "agent_id": "graph-agent-1", "banana_rate": "~201/day", "status": "active"},
-    {"name": "Timothy", "role": "Agent 7 (Logging)", "agent_id": "log-agent-1", "banana_rate": "~156/day", "status": "active"},
-    {"name": "Otto", "role": "Agent 8 (Testing)", "agent_id": "test-agent-1", "banana_rate": "~89/day", "status": "active"}
+    {
+      "name": "Kevin",
+      "role": "Orchestrator/PM",
+      "agent_id": "orchestrator-agent-1",
+      "banana_rate": "infinite",
+      "status": "active"
+    },
+    {
+      "name": "Stuart",
+      "role": "Agent 3 (GUI)",
+      "agent_id": "gui-agent-1",
+      "banana_rate": "~80/day",
+      "status": "active"
+    },
+    {
+      "name": "Dave",
+      "role": "Agent 9 (Docs)",
+      "agent_id": "docs-agent-1",
+      "banana_rate": "~65/day",
+      "status": "active"
+    },
+    {
+      "name": "Bob",
+      "role": "Agent 2 (ECU)",
+      "agent_id": "ecu-agent-1",
+      "banana_rate": "~850/day",
+      "status": "active"
+    },
+    {
+      "name": "Carl",
+      "role": "Agent 6 (Serial)",
+      "agent_id": "serial-agent-1",
+      "banana_rate": "~390/day",
+      "status": "active"
+    },
+    {
+      "name": "Neil",
+      "role": "Agent 4 (Dashboard)",
+      "agent_id": "dashboard-agent-1",
+      "banana_rate": "~312/day",
+      "status": "active"
+    },
+    {
+      "name": "Marcus",
+      "role": "Agent 5 (Graphing)",
+      "agent_id": "graph-agent-1",
+      "banana_rate": "~201/day",
+      "status": "active"
+    },
+    {
+      "name": "Timothy",
+      "role": "Agent 7 (Logging)",
+      "agent_id": "log-agent-1",
+      "banana_rate": "~156/day",
+      "status": "active"
+    },
+    {
+      "name": "Otto",
+      "role": "Agent 8 (Testing)",
+      "agent_id": "test-agent-1",
+      "banana_rate": "~89/day",
+      "status": "active"
+    }
   ],
   "milestones": {
-    "1_repository_ci": {"name": "Repository and CI setup", "status": "in_progress", "progress": 15},
-    "2_serial_comm": {"name": "Serial communication", "status": "completed", "progress": 100},
-    "3_protocol_impl": {"name": "CONSULT-I protocol", "status": "completed", "progress": 100},
-    "4_ecu_discovery": {"name": "ECU discovery", "status": "completed", "progress": 80},
-    "5_live_sensor": {"name": "Live sensor streaming", "status": "completed", "progress": 90},
-    "6_basic_dashboard": {"name": "Basic GTK dashboard", "status": "completed", "progress": 100},
-    "7_graphing_logging": {"name": "Graphing and logging", "status": "in_progress", "progress": 35},
-    "8_dtc_read_clear": {"name": "DTC read/clear", "status": "completed", "progress": 85},
-    "9_session_recording": {"name": "Session recording/replay", "status": "pending", "progress": 0},
-    "10_plugin_api": {"name": "Plugin API", "status": "pending", "progress": 0},
-    "11_documentation_packaging": {"name": "Documentation and packaging", "status": "in_progress", "progress": 60},
-    "12_v088_release": {"name": "Version 0.88 release", "status": "pending", "progress": 0}
+    "1_repository_ci": {
+      "name": "Repository and CI setup",
+      "status": "in_progress",
+      "progress": 15
+    },
+    "2_serial_comm": {
+      "name": "Serial communication",
+      "status": "completed",
+      "progress": 100
+    },
+    "3_protocol_impl": {
+      "name": "CONSULT-I protocol",
+      "status": "completed",
+      "progress": 100
+    },
+    "4_ecu_discovery": {
+      "name": "ECU discovery",
+      "status": "completed",
+      "progress": 80
+    },
+    "5_live_sensor": {
+      "name": "Live sensor streaming",
+      "status": "completed",
+      "progress": 90
+    },
+    "6_basic_dashboard": {
+      "name": "Basic GTK dashboard",
+      "status": "completed",
+      "progress": 100
+    },
+    "7_graphing_logging": {
+      "name": "Graphing and logging",
+      "status": "completed",
+      "progress": 100
+    },
+    "8_dtc_read_clear": {
+      "name": "DTC read/clear",
+      "status": "completed",
+      "progress": 100
+    },
+    "9_session_recording": {
+      "name": "Session recording/replay",
+      "status": "completed",
+      "progress": 100
+    },
+    "10_plugin_api": {
+      "name": "Plugin API",
+      "status": "pending",
+      "progress": 0
+    },
+    "11_documentation_packaging": {
+      "name": "Documentation and packaging",
+      "status": "in_progress",
+      "progress": 60
+    },
+    "12_v088_release": {
+      "name": "Version 0.88 release",
+      "status": "pending",
+      "progress": 0
+    }
   },
   "tasks": [
-    {"id": "T001", "task": "Implement live line-graph renderer for GTK4 DrawingArea", "owner": "Marcus", "priority": "High", "status": "assigned", "depends_on": ["T002"], "progress": 0, "module": "graphs/", "description": "Wire up matplotlib/Cairo rendering to GTK4 DrawingArea. Support multiple sensor sources, zoom, pan, history, CSV export. Replace placeholder in GUI."},
-    {"id": "T002", "task": "Integrate sensor_reader history buffer with graphing module", "owner": "Marcus", "priority": "High", "status": "assigned", "depends_on": [], "progress": 0, "module": "graphs/", "description": "Connect DashboardDataProcessor.get_history() output to graph rendering pipeline. Ensure thread-safe access, proper data formatting."},
-    {"id": "T003", "task": "Fix GUI to use GTK4 sidebar navigation (gnome-settings style)", "owner": "Stuart", "priority": "High", "status": "pending", "depends_on": [], "progress": 0, "module": "gui/", "description": "Replace current notebook/menubar layout with Gtk.StackSidebar + Gtk.Stack for left-side navigation panel. Windows: Dashboard, Graphs, Error Codes, Settings, About."},
-    {"id": "T004", "task": "Implement Error Codes page with real DTC reading", "owner": "Bob", "priority": "High", "status": "pending", "depends_on": ["T002"], "progress": 0, "module": "gui/", "description": "Build proper DTC page with reading, display, translation, and clear/reset button. Wire to protocol layer."},
-    {"id": "T005", "task": "Implement graphing page in GUI with live rendering", "owner": "Stuart", "priority": "High", "status": "pending", "depends_on": ["T001"], "progress": 0, "module": "gui/", "description": "Wire graphs/visualization.py to GTK4 DrawingArea. Add sensor source selector, zoom controls, recording buttons, CSV export."},
-    {"id": "T006", "task": "Implement session recording and replay", "owner": "Timothy", "priority": "Medium", "status": "pending", "depends_on": ["T002"], "progress": 0, "module": "logging/", "description": "Create logging module for CSV/SQLite/JSON session recording. Add replay functionality for recorded sessions."},
-    {"id": "T007", "task": "Implement dashboard customization (reorder/remove gauges)", "owner": "Neil", "priority": "Medium", "status": "pending", "depends_on": ["T003"], "progress": 0, "module": "dashboard/", "description": "Build actual widget reordering UI in Settings. Allow users to reorder, add, remove gauges. Persist layout."},
-    {"id": "T008", "task": "Write unit tests for all modules", "owner": "Otto", "priority": "High", "status": "pending", "depends_on": [], "progress": 0, "module": "tests/", "description": "Unit tests for protocol, serial, ecu, gui, graphs. Integration tests for full stack."},
-    {"id": "T009", "task": "Set up CI/CD pipeline", "owner": "Kevin", "priority": "Medium", "status": "pending", "depends_on": ["T008"], "progress": 0, "module": "ci/", "description": "GitHub Actions for linting, formatting, coverage, nightly builds, release automation."},
-    {"id": "T010", "task": "Clean up repo: remove backups, __pycache__, temp files", "owner": "Kevin", "priority": "Medium", "status": "in_progress", "progress": 10, "module": "root/", "description": "Remove all backup files, gtk_viewer_*.py, adapter_*.py, verify_*.py, __pycache__ dirs. Proper .gitignore."},
-    {"id": "T011", "task": "Fix packaging: correct .deb, build system, entry point", "owner": "Kevin", "priority": "High", "status": "pending", "depends_on": ["T010"], "progress": 0, "module": "packaging/", "description": "Fix typo in README, proper debian/control, setup.py/pyproject.toml, opengonsult entry point, desktop file."},
-    {"id": "T012", "task": "Update documentation: README, API docs, user manual", "owner": "Dave", "priority": "Medium", "status": "pending", "depends_on": [], "progress": 0, "module": "docs/", "description": "Update README with current features, write API docs, user manual, protocol specification."},
-    {"id": "T013", "task": "Implement Plugin API", "owner": "Kevin", "priority": "Low", "status": "pending", "depends_on": [], "progress": 0, "module": "plugins/", "description": "Basic plugin system for custom sensors, DTC definitions, graph themes."},
-    {"id": "T014", "task": "Add dark mode theme to all pages", "owner": "Neil", "priority": "Medium", "status": "pending", "depends_on": ["T003"], "progress": 0, "module": "themes/", "description": "Proper CSS themes for dark/light mode across all GTK4 pages."},
-    {"id": "T015", "task": "Version 0.88 release package", "owner": "Kevin", "priority": "High", "status": "pending", "depends_on": ["T011", "T012"], "progress": 0, "module": "releases/", "description": "Final .deb package for v0.88 release with all features."}
+    {
+      "id": "T001",
+      "task": "Implement live line-graph renderer for GTK4 DrawingArea",
+      "owner": "Marcus",
+      "priority": "High",
+      "status": "completed",
+      "depends_on": [
+        "T002"
+      ],
+      "progress": 100,
+      "module": "graphs/",
+      "description": "Live line-graph (Cairo) in sensor_graph.py with multi-sensor overlay, zoom, pan, history, PNG + CSV export. plot_xy math extracted and unit-tested."
+    },
+    {
+      "id": "T002",
+      "task": "Integrate sensor_reader history buffer with graphing module",
+      "owner": "Marcus",
+      "priority": "High",
+      "status": "completed",
+      "depends_on": [],
+      "progress": 100,
+      "module": "graphs/",
+      "description": "DashboardDataProcessor.get_history() wired to SensorGraphWidget; fixed timestamp handling, time import, and smoothing slice. Rolling window trimmed per configured seconds."
+    },
+    {
+      "id": "T003",
+      "task": "Fix GUI to use GTK4 sidebar navigation (gnome-settings style)",
+      "owner": "Stuart",
+      "priority": "High",
+      "status": "pending",
+      "depends_on": [],
+      "progress": 0,
+      "module": "gui/",
+      "description": "Replace current notebook/menubar layout with Gtk.StackSidebar + Gtk.Stack for left-side navigation panel. Windows: Dashboard, Graphs, Error Codes, Settings, About."
+    },
+    {
+      "id": "T004",
+      "task": "Implement Error Codes page with real DTC reading",
+      "owner": "Bob",
+      "priority": "High",
+      "status": "completed",
+      "depends_on": [
+        "T002"
+      ],
+      "progress": 100,
+      "module": "gui/ + ecu/dtc.py + ecu/ecu_db.py",
+      "description": "Real DTC read/clear: ecu/dtc.py decodes actual CONSULT-I single-byte fault codes (Read=0xd1, Clear=0xc1, 0x55=no fault, code+starts pairs). Fixed DTC command constants, wired decoder into Diagnostics page, added numeric-code translation fallback in ECUDatabase, plus tests/test_dtc.py."
+    },
+    {
+      "id": "T005",
+      "task": "Implement graphing page in GUI with live rendering",
+      "owner": "Stuart",
+      "priority": "High",
+      "status": "completed",
+      "depends_on": [
+        "T001"
+      ],
+      "progress": 100,
+      "module": "gui/",
+      "description": "Graphing page in GUI with live rendering, sensor selection, zoom/pan, window selector, PNG+CSV export, session record/playback controls in the toolbar."
+    },
+    {
+      "id": "T006",
+      "task": "Implement session recording and replay",
+      "owner": "Timothy",
+      "priority": "Medium",
+      "status": "completed",
+      "depends_on": [
+        "T002"
+      ],
+      "progress": 100,
+      "module": "sessionrec/",
+      "description": "Session recording and replay: SessionLogger (start/stop), CSV/SQLite/JSON writers, SessionReplayer (play/pause/stop) driving the graph. Package named sessionrec/ to avoid shadowing stdlib logging."
+    },
+    {
+      "id": "T007",
+      "task": "Implement dashboard customization (reorder/remove gauges)",
+      "owner": "Neil",
+      "priority": "Medium",
+      "status": "pending",
+      "depends_on": [
+        "T003"
+      ],
+      "progress": 0,
+      "module": "dashboard/",
+      "description": "Build actual widget reordering UI in Settings. Allow users to reorder, add, remove gauges. Persist layout."
+    },
+    {
+      "id": "T008",
+      "task": "Write unit tests for all modules",
+      "owner": "Otto",
+      "priority": "High",
+      "status": "pending",
+      "depends_on": [],
+      "progress": 0,
+      "module": "tests/",
+      "description": "Unit tests for protocol, serial, ecu, gui, graphs. Integration tests for full stack."
+    },
+    {
+      "id": "T009",
+      "task": "Set up CI/CD pipeline",
+      "owner": "Kevin",
+      "priority": "Medium",
+      "status": "pending",
+      "depends_on": [
+        "T008"
+      ],
+      "progress": 0,
+      "module": "ci/",
+      "description": "GitHub Actions for linting, formatting, coverage, nightly builds, release automation."
+    },
+    {
+      "id": "T010",
+      "task": "Clean up repo: remove backups, __pycache__, temp files",
+      "owner": "Kevin",
+      "priority": "Medium",
+      "status": "in_progress",
+      "progress": 10,
+      "module": "root/",
+      "description": "Remove all backup files, gtk_viewer_*.py, adapter_*.py, verify_*.py, __pycache__ dirs. Proper .gitignore."
+    },
+    {
+      "id": "T011",
+      "task": "Fix packaging: correct .deb, build system, entry point",
+      "owner": "Kevin",
+      "priority": "High",
+      "status": "pending",
+      "depends_on": [
+        "T010"
+      ],
+      "progress": 0,
+      "module": "packaging/",
+      "description": "Fix typo in README, proper debian/control, setup.py/pyproject.toml, opengonsult entry point, desktop file."
+    },
+    {
+      "id": "T012",
+      "task": "Update documentation: README, API docs, user manual",
+      "owner": "Dave",
+      "priority": "Medium",
+      "status": "pending",
+      "depends_on": [],
+      "progress": 0,
+      "module": "docs/",
+      "description": "Update README with current features, write API docs, user manual, protocol specification."
+    },
+    {
+      "id": "T013",
+      "task": "Implement Plugin API",
+      "owner": "Kevin",
+      "priority": "Low",
+      "status": "pending",
+      "depends_on": [],
+      "progress": 0,
+      "module": "plugins/",
+      "description": "Basic plugin system for custom sensors, DTC definitions, graph themes."
+    },
+    {
+      "id": "T014",
+      "task": "Add dark mode theme to all pages",
+      "owner": "Neil",
+      "priority": "Medium",
+      "status": "pending",
+      "depends_on": [
+        "T003"
+      ],
+      "progress": 0,
+      "module": "themes/",
+      "description": "Proper CSS themes for dark/light mode across all GTK4 pages."
+    },
+    {
+      "id": "T015",
+      "task": "Version 0.88 release package",
+      "owner": "Kevin",
+      "priority": "High",
+      "status": "pending",
+      "depends_on": [
+        "T011",
+        "T012"
+      ],
+      "progress": 0,
+      "module": "releases/",
+      "description": "Final .deb package for v0.88 release with all features."
+    }
   ]
 }
