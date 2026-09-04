@@ -1,70 +1,127 @@
-# OpenGonsult v0.88+ 🧝✨📊⚡
+# OpenGonsult 🧝✨📊⚡
 
-> This is a **wibecoding test** for AI, it will most definetly not work (but somehow does?!) 😂💀
+> An open-source diagnostic suite for Nissan vehicles equipped with the
+> **CONSULT-I (14-pin)** diagnostic interface. Native GTK4, zero corporate
+> software energy, maximum goblin energy. 🧝🔥
+>
+> It reads live engine sensors, graphs them, records sessions for replay, and
+> wrangles diagnostic trouble codes. Somehow it works. Probably.
 
-## Why the funny name?
-Because "OpenGonsul" was too serious and we needed some chaotic vibes 🧝🔥
-*Also because goblin energy is superior to corporate software naming.* 👾✨
+## 🔥 What's New in v0.88 📊💪
 
----
-
-## 🔥 What's New in v0.69+ 📊💪
-
-**REAL-TIME SENSOR MONITORING**! Yes, your car dashboard now has:
-- ⚙️ **Live RPM gauge** - watch those numbers dance!
-- 🌡️ **Temperature monitoring** (coolant & intake air temp)  
-- 🔋 **Battery voltage tracking** with automatic calibration
-- 🎨 Beautiful GTK4 progress bars that actually update in real-time!  
-
-The magic happens via our new `ecu/sensor_reader.py` module and CONSULT-I protocol parser. Your car talks, your dashboard listens, chaos ensues (in a scientifically verified way). ⚡🧝
-
----
+- ⚙️ **Real-time gauges** — RPM, coolant temp, battery voltage, vehicle speed,
+  throttle position, O2 sensor. SPINNY. 🎡
+- 📈 **Live graphing** — zoom, pan, per-sensor toggles, and **CSV export** of
+  whatever chaos the car is spewing.
+- 💾 **Session recording & replay** — capture a drive in **CSV, SQLite or JSON**
+  and play it back on the graph. Your car's best moments, preserved forever.
+- 🔧 **Diagnostic Trouble Codes** — real CONSULT-I read (`0xd1`) and clear
+  (`0xc1`), with plain-English translations from the built-in DTC index.
+- 🎨 **Dark mode** — because staring at a laptop in a dark garage is a
+  lifestyle. Config persisted to `~/.config/opengonsult/config.json`.
+- 🤖 **Simulation mode** — no car? No problem. The dashboard fakes it with
+  software-synthesized sensor data so you can still fiddle forever.
 
 ## What's in here? 📦
-A bizzare collection of components trying to solve car diagnostics:
-- `protocol/` - CONSULT-I protocol parser (talking to real cars now!)
-- `ecu/sensor_reader.py` - Dashboard data processor with live sensor updates  
-- `gui/main_window.py` - GTK4 interface with animated gauges
-- `serial/`, `dashboard/`, `themes/` - The usual suspects 🕵️‍♂️
-- **System-wide command**: Run `opengonsult` from anywhere! 💻🔨
-- **GNOME desktop integration**: Auto-starts with your custom goblin icon!
 
----
+A bizarre collection of cooperating modules:
+
+- `protocol/consult.py` — CONSULT-I protocol implementation (framing,
+  timestamp/signature validation, replay protection, exponential-backoff retry)
+- `serial/adapter.py` — async pyserial layer (USB/Bluetooth) with a race-free
+  command queue and auto-reconnect
+- `ecu/` — sensor processing (`sensors.py`), the Nissan ECU database
+  (`ecu_db.py`), and the **DTC decoder** (`dtc.py`)
+- `graphs/sensor_graph.py` — GTK4 graphing widget with session record/replay
+- `sessionrec/` — session sample formats + logger + replayer (CSV/SQLite/JSON)
+- `dashboard/` — gauge widgets and a software simulator for sensor data
+- `gui/main_window.py` — the GTK4 app shell (Dashboard, Graphing, Diagnostics,
+  Settings, About pages)
 
 ## Installation 🔧
-```bash  
-debsum -i OpenGonsult_0.88+1ammy_amd64.deb # TODO: build it properly (we're still figuring this part out)
-pip3 install . or run ./scripts/install.sh if you feel lucky 🎲
-opengnsult --version  # should say v0.88+
+
+**From source (pip):**
+
+```bash
+pip install .
+opengonsult --version   # should say OpenGonsult 0.88
 ```
 
-## Features Showcase ⚡📊
-- Real-time RPM: **Live updates every 3 seconds** (configurable)
-- Temperature tracking: Celsius with automatic range validation ✅
-- Battery voltage monitoring: From raw CAN bus to real numbers 🧮✨
-- Dashboard auto-refresh: Your data, always fresh and chaotic
-- Error handling: Graceful degradation because sometimes the car lies 💀
+**From the `.deb` package** (build it first, or grab the one in `releases/`):
 
----
+```bash
+dpkg -i OpenGonsult_0.88-1jammy_all.deb
+opengonsult --version
+```
+
+**RPM folk:** there's a spec file in `packaging/rpm/opengonsult.spec` — build
+it with your favourite RPM sausage-maker.
+
+> The DEB and RPM releases land properly in **Milestone 12**. Until then the
+> `pip install .` path is the one that definitely works.
+
+## Usage 🚗
+
+Just run it:
+
+```bash
+opengonsult
+```
+
+- Connect the 14-pin CONSULT-I adapter to a serial port (default
+  `/dev/ttyUSB0`), pick a baud rate in **Settings**, hit Connect.
+- No hardware? Flip on **simulation mode** in Settings and the dashboard
+  comes alive with fictional-but-plausible data.
+- Diagnostics page: **Read Codes** to fetch stored DTCs, **Clear Codes** to
+  wipe them. Codes are translated via the DTC index where known.
+- Graphing page: toggle sensors, record a session, export it, and replay it.
 
 ## Under The Hood (For Nerds) 🔬🤓
+
 ```
 opengonsult/
-├── ecu/sensor_reader.py    # DashboardDataProcessor 🧝⚡  
-│   ├── update(sensor_data)
-│   └── get_sensor_values() -> {rpm, temp, voltage}
-├── gui/main_window.py       # GTK4 dashboard with animated gauges ✨
-│   ├── rpm_progress_bar
-│   ├── temp_progress_bar (°C) 
-│   └── voltage_progress_bar (V)
-├── protocol/consult_parser.py  # CONSULT-I decoder 🔧📊
-│   ├── raw CAN → engineering units 🔄
-│   ├── automatic calibration value fetching ⚙️
-│   └── temperature/voltage normalization formulas ✅
+├── bin/opengonsult          # system launcher (inserts repo root on PATH)
+├── gui/
+│   └── main_window.py       # GTK4 app shell + 5-page navigation
+├── protocol/
+│   └── consult.py           # CONSULT-I framing, packets, retry/security
+├── serial/
+│   └── adapter.py           # async pyserial adapter + command queue
+├── ecu/
+│   ├── sensors.py           # DashboardDataProcessor (gauges + history)
+│   ├── ecu_db.py            # ECU/sensor/DTC database & definitions
+│   └── dtc.py               # CONSULT-I DTC decoder + fault index
+├── graphs/
+│   └── sensor_graph.py      # GTK4 graphing + session record/replay UI
+├── sessionrec/              # CSV / SQLite / JSON sample formats, logger, replayer
+├── dashboard/               # gauge widgets + sensor simulator
+├── themes/                  # (future) CSS themes
+└── tests/                   # unittest suite (39 tests, all green)
 ```
-**Version**: `OpenGonsult v0.88+` (changelog in CHANGELOG.md)
+
+## Development 🧪
+
+```bash
+# run the test suite (headless, no hardware or GTK display needed)
+python3 -m unittest discover -s tests -v
+
+# lint (bug-risk rules only)
+ruff check .
+
+# launch without installing
+PYTHONPATH=$PYTHONPATH:$(pwd) python3 gui/main_window.py
+```
+
+CI (GitHub Actions) runs lint + tests (under Xvfb) + a build for every push to
+`main`/`master`.
+
+## License 📜
+
+**GPL-3.0-or-later.** Free software, chaos included. See `LICENSE` and the
+Debian copyright file in `debian-build/`.
+
 ---
 
-*Created by wiczajac666 for the chaos 🧝✨📊 - now with real sensor gauges!*
-
-_P.S. The chaotic vibes haven't stopped, we just added scientific monitoring._ 🔥⚡ 
+*Created by wiczajac666 for the chaos 🧝✨📊 — v0.69+ got real sensor gauges,
+v0.88 got graphs, sessions and DTCs. What's next? Fuel injector séances,
+probably.*
