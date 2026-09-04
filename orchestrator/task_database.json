@@ -70,8 +70,8 @@
   "milestones": {
     "1_repository_ci": {
       "name": "Repository and CI setup",
-      "status": "in_progress",
-      "progress": 15
+      "status": "completed",
+      "progress": 100
     },
     "2_serial_comm": {
       "name": "Serial communication",
@@ -222,9 +222,9 @@
       "task": "Write unit tests for all modules",
       "owner": "Otto",
       "priority": "High",
-      "status": "pending",
+      "status": "completed",
       "depends_on": [],
-      "progress": 0,
+      "progress": 100,
       "module": "tests/",
       "description": "Unit tests for protocol, serial, ecu, gui, graphs. Integration tests for full stack."
     },
@@ -233,11 +233,11 @@
       "task": "Set up CI/CD pipeline",
       "owner": "Kevin",
       "priority": "Medium",
-      "status": "pending",
+      "status": "completed",
       "depends_on": [
         "T008"
       ],
-      "progress": 0,
+      "progress": 100,
       "module": "ci/",
       "description": "GitHub Actions for linting, formatting, coverage, nightly builds, release automation."
     },
@@ -246,8 +246,8 @@
       "task": "Clean up repo: remove backups, __pycache__, temp files",
       "owner": "Kevin",
       "priority": "Medium",
-      "status": "in_progress",
-      "progress": 10,
+      "status": "completed",
+      "progress": 100,
       "module": "root/",
       "description": "Remove all backup files, gtk_viewer_*.py, adapter_*.py, verify_*.py, __pycache__ dirs. Proper .gitignore."
     },
@@ -256,11 +256,11 @@
       "task": "Fix packaging: correct .deb, build system, entry point",
       "owner": "Kevin",
       "priority": "High",
-      "status": "pending",
+      "status": "completed",
       "depends_on": [
         "T010"
       ],
-      "progress": 0,
+      "progress": 100,
       "module": "packaging/",
       "description": "Fix typo in README, proper debian/control, setup.py/pyproject.toml, opengonsult entry point, desktop file."
     },
