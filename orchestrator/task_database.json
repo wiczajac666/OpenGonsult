@@ -114,7 +114,7 @@
       "progress": 100
     },
     "10_plugin_api": {
-      "name": "Plugin API",
+      "name": "Plugin API (target version 0.95)",
       "status": "pending",
       "progress": 0
     },
@@ -284,7 +284,7 @@
       "depends_on": [],
       "progress": 0,
       "module": "plugins/",
-      "description": "Basic plugin system for custom sensors, DTC definitions, graph themes."
+      "description": "Basic plugin system for custom sensors, DTC definitions, graph themes. Targeted for release 0.95."
     },
     {
       "id": "T014",
