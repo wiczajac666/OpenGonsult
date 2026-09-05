@@ -1,9 +1,9 @@
 """Graph Visualization Module.
 
 Provides plotting utilities for the graphing module using matplotlib.
+matplotlib is imported lazily so that merely importing the graphs package
+does not require it (tests and CI run headless without matplotlib).
 """
-
-import matplotlib.pyplot as plt
 
 
 def plot_graph(graph, layout='spring', node_size=300, edge_labels=True,
@@ -21,6 +21,7 @@ def plot_graph(graph, layout='spring', node_size=300, edge_labels=True,
     Returns:
         fig, ax tuple from matplotlib
     """
+    import matplotlib.pyplot as plt
     import networkx as nx
 
     # Convert our DirectedGraph to a NetworkX DiGraph

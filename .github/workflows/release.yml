@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build artifacts + GitHub release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install tooling
+        run: |
+          python -m pip install build
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends dpkg-dev rpm desktop-file-utils
+      - name: Build sdist and wheel
+        run: python -m build
+      - name: Build .deb from the staging tree
+        run: |
+          scripts/build-deb.sh
+          desktop-file-validate \
+            debian-build/usr/share/applications/org.opengonsult.OpenGonsult.desktop
+      - name: Build RPM (best-effort)
+        id: rpm
+        continue-on-error: true
+        run: |
+          scripts/build-rpm.sh
+          echo "rpm_ok=1" >> "$GITHUB_OUTPUT"
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ github.ref_name }}"
+          FILES="dist/*.whl dist/*.tar.gz releases/OpenGonsult_*.deb releases/opengonsult-*.rpm"
+          args=()
+          for f in $(eval echo "$FILES"); do
+            [ -f "$f" ] && args+=("$f")
+          done
+          gh release create "$TAG" "${args[@]}" \
+            --title "$TAG" \
+            --notes "OpenGonsult $TAG release artifacts: wheel, sdist, .deb and (best-effort) .rpm."

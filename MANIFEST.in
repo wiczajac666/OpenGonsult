@@ -1,0 +1,5 @@
+graft packaging
+graft icons
+include LICENSE
+include README.md
+include CHANGELOG.md

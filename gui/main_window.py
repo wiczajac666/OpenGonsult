@@ -26,8 +26,9 @@ import time
 
 import cairo
 import gi
+gi.require_version('Gdk', '4.0')
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gio, Gtk, GLib, Pango
+from gi.repository import Gdk, Gio, Gtk, GLib, Pango
 
 from dashboard.simulator import SimulationEngine
 
@@ -122,9 +123,13 @@ SENSOR_COMMANDS = {
 
 SEVERITY_CSS = {"critical": "error", "warning": "warning", "info": "success"}
 
+THEME_NAMES = ("System", "Dark", "Light")
+_THEMES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "themes")
+
 
 def load_config():
     config = {
+        "theme": "system",
         "dark_mode": True,
         "serial_port": "/dev/ttyUSB0",
         "baud_rate": 9600,
@@ -137,6 +142,10 @@ def load_config():
             for key in list(config.keys()):
                 if key in stored:
                     config[key] = stored[key]
+        if "theme" not in config and "dark_mode" in stored:
+            config["theme"] = "dark" if stored["dark_mode"] else "light"
+        if config["theme"] not in ("system", "dark", "light"):
+            config["theme"] = "system"
     except (OSError, ValueError):
         pass
     return config
@@ -537,6 +546,7 @@ class MainWindow(Gtk.ApplicationWindow):
         status_box.set_margin_bottom(4)
         status_box.set_margin_start(10)
         status_box.set_margin_end(10)
+        status_box.add_css_class("statusbar")
         self.status_image = Gtk.Image.new_from_icon_name("dialog-information-symbolic")
         status_box.append(self.status_image)
         self.status_label = Gtk.Label(label="Ready", xalign=0.0)
@@ -545,7 +555,7 @@ class MainWindow(Gtk.ApplicationWindow):
         status_box.append(self.status_label)
         root.append(status_box)
 
-        self.apply_dark_mode(bool(self.config.get("dark_mode")))
+        self.dark_mode = self.apply_theme(str(self.config.get("theme", "system")))
         self.start_gauge_timer()
         if self.simulating:
             self.start_simulation()
@@ -897,13 +907,16 @@ class MainWindow(Gtk.ApplicationWindow):
         self.baud_combo.connect("changed", self.on_baud_changed)
         form.attach(self.baud_combo, 1, 2, 2, 1)
 
-        dark_label = Gtk.Label(label="Dark mode", xalign=0.0)
-        form.attach(dark_label, 0, 3, 1, 1)
-        self.dark_switch = Gtk.Switch()
-        self.dark_switch.set_active(bool(self.config.get("dark_mode")))
-        self.dark_switch.set_valign(Gtk.Align.CENTER)
-        self.dark_switch.connect("state-set", self.on_dark_mode_toggled)
-        form.attach(self.dark_switch, 1, 3, 2, 1)
+        theme_label = Gtk.Label(label="Theme", xalign=0.0)
+        form.attach(theme_label, 0, 3, 1, 1)
+        self.theme_combo = Gtk.ComboBoxText()
+        for name in THEME_NAMES:
+            self.theme_combo.append_text(name)
+        saved_theme = str(self.config.get("theme", "system")).title()
+        self.theme_combo.set_active(THEME_NAMES.index(saved_theme) if saved_theme in THEME_NAMES else 0)
+        self.theme_combo.set_hexpand(True)
+        self.theme_combo.connect("changed", self.on_theme_changed)
+        form.attach(self.theme_combo, 1, 3, 2, 1)
 
         hint = Gtk.Label(xalign=0.0)
         hint.add_css_class("dim-label")
@@ -967,20 +980,55 @@ class MainWindow(Gtk.ApplicationWindow):
             self.config["baud_rate"] = int(text)
             self.persist_settings()
 
-    def on_dark_mode_toggled(self, _switch, state):
-        self.config["dark_mode"] = bool(state)
-        self.persist_settings()
-        self.apply_dark_mode(bool(state))
-        self.set_status(
-            "Dark mode " + ("enabled." if state else "disabled."),
-            "dialog-information-symbolic",
-        )
-        return False
+    def on_theme_changed(self, combo):
+        text = combo.get_active_text()
+        if text:
+            theme = text.lower()
+            self.config["theme"] = theme
+            self.dark_mode = self.apply_theme(theme)
+            self.config["dark_mode"] = self.dark_mode
+            self.persist_settings()
+            self.set_status(
+                "Theme set to {0}.".format(text),
+                "dialog-information-symbolic",
+            )
 
-    def apply_dark_mode(self, dark):
+    def _system_prefers_dark(self):
         settings = Gtk.Settings.get_default()
-        if settings is not None:
-            settings.set_property("gtk-application-prefer-dark-theme", bool(dark))
+        if settings is None:
+            return True
+        theme = str(settings.get_property("gtk-theme-name") or "")
+        return bool(settings.get_property("gtk-application-prefer-dark-theme")) or "dark" in theme.lower()
+
+    def apply_theme(self, theme):
+        """Resolve the requested theme and install its CSS palette.
+
+        Returns True when the resolved appearance is dark so callers can keep
+        the legacy dark_mode flag in sync (the graphing page reads it).
+        """
+        if theme == "system":
+            dark = self._system_prefers_dark()
+        else:
+            dark = theme == "dark"
+            settings = Gtk.Settings.get_default()
+            if settings is not None:
+                settings.set_property("gtk-application-prefer-dark-theme", dark)
+        css_name = "dark.css" if dark else "light.css"
+        self._load_css_provider(css_name)
+        return dark
+
+    def _load_css_provider(self, css_name):
+        path = os.path.join(_THEMES_DIR, css_name)
+        if not os.path.exists(path):
+            return
+        display = Gdk.Display.get_default()
+        if display is None:
+            return
+        provider = Gtk.CssProvider()
+        provider.load_from_path(path)
+        Gtk.StyleContext.add_provider_for_display(
+            display, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
 
     # ------------------------------------------------------------------
     # About page

@@ -1,0 +1,15 @@
+/* OpenGonsult light palette - goblin gold on parchment. */
+@define-color opg_accent_color #8a6d00;
+@define-color opg_accent_fg_color #ffffff;
+
+.navigation-sidebar row:selected {
+    background-color: @opg_accent_color;
+    color: @opg_accent_fg_color;
+}
+.navigation-sidebar row:selected image {
+    color: @opg_accent_fg_color;
+}
+
+statusbar {
+    border-top: 1px solid alpha(@opg_accent_color, 0.25);
+}

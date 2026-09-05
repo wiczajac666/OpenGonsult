@@ -1,0 +1,15 @@
+/* OpenGonsult dark palette - goblin gold on deep charcoal. */
+@define-color opg_accent_color #e0a400;
+@define-color opg_accent_fg_color #1a1510;
+
+.navigation-sidebar row:selected {
+    background-color: @opg_accent_color;
+    color: @opg_accent_fg_color;
+}
+.navigation-sidebar row:selected image {
+    color: @opg_accent_fg_color;
+}
+
+statusbar {
+    border-top: 1px solid alpha(@opg_accent_color, 0.30);
+}

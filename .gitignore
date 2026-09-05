@@ -11,6 +11,7 @@ dist/
 .venv/
 venv/
 *.deb
+*.rpm
 
 # Test / lint / coverage caches
 .pytest_cache/

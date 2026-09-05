@@ -44,6 +44,9 @@ packages = [
 [tool.setuptools.dynamic]
 version = { attr = "gui.__version__" }
 
+[tool.setuptools.package-data]
+gui = ["themes/*.css"]
+
 [tool.ruff]
 target-version = "py38"
 line-length = 100

@@ -6,7 +6,6 @@ This module provides real-time sensor data reading and processing functionality
 integrating with ECU communication protocols to decode engine performance metrics.
 """
 
-import asyncio
 import time
 from typing import Dict, Optional, Callable, List
 from dataclasses import dataclass, field

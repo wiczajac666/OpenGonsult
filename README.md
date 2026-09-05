@@ -47,7 +47,8 @@ pip install .
 opengonsult --version   # should say OpenGonsult 0.88
 ```
 
-**From the `.deb` package** (build it first, or grab the one in `releases/`):
+**From the `.deb` package** (grab the one in `releases/` after a build, or check
+the GitHub releases page):
 
 ```bash
 dpkg -i OpenGonsult_0.88-1jammy_all.deb
@@ -58,11 +59,20 @@ Installing from `.deb`/`.rpm` also drops the app into your **GNOME
 application drawer** (with the goblin icon) via the
 `org.opengonsult.OpenGonsult.desktop` entry.
 
-**RPM folk:** there's a spec file in `packaging/rpm/opengonsult.spec` — build
-it with your favourite RPM sausage-maker.
+**RPM folk:** the spec lives in `packaging/rpm/opengonsult.spec`, and
+`scripts/build-rpm.sh` builds `opengonsult-<version>.noarch.rpm` locally:
 
-> The DEB and RPM releases land properly in **Milestone 12**. Until then the
-> `pip install .` path is the one that definitely works.
+```bash
+./scripts/build-rpm.sh        # outputs to releases/
+```
+
+Both package formats are rebuilt by the **release workflow** whenever a `v*`
+tag is pushed, and the artifacts are attached to the GitHub release. To build
+the `.deb` locally:
+
+```bash
+./scripts/build-deb.sh        # outputs to releases/
+```
 
 ## Usage 🚗
 

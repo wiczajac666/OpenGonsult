@@ -125,8 +125,8 @@
     },
     "12_v088_release": {
       "name": "Version 0.88 release",
-      "status": "pending",
-      "progress": 0
+      "status": "completed",
+      "progress": 100
     }
   },
   "tasks": [
@@ -291,27 +291,27 @@
       "task": "Add dark mode theme to all pages",
       "owner": "Neil",
       "priority": "Medium",
-      "status": "pending",
+      "status": "completed",
       "depends_on": [
         "T003"
       ],
-      "progress": 0,
+      "progress": 100,
       "module": "themes/",
-      "description": "Proper CSS themes for dark/light mode across all GTK4 pages."
+      "description": "Proper CSS themes for dark/light mode across all GTK4 pages. gui/themes/{dark,light}.css palettes installed app-wide via GtkCssProvider; Settings grew a Theme selector (System/Dark/Light, persisted as 'theme' with legacy dark_mode kept in sync)."
     },
     {
       "id": "T015",
       "task": "Version 0.88 release package",
       "owner": "Kevin",
       "priority": "High",
-      "status": "pending",
+      "status": "completed",
       "depends_on": [
         "T011",
         "T012"
       ],
-      "progress": 0,
+      "progress": 100,
       "module": "releases/",
-      "description": "Final .deb package for v0.88 release with all features."
+      "description": "Final release for v0.88: debian-build re-synced (zero staged drift, no .pyc), changelog.Debian.gz author fixed, Installed-Size recomputed, LICENSE shipped. OpenGonsult_0.88-1jammy_all.deb built and install-tested. RPM spec fixed (dashboard/sessionrec copied, man page gz, launcher reads gui.__version__); opengonsult-0.88-1.noarch.rpm built and payload-tested. scripts/{build-deb,build-rpm}.sh, MANIFEST.in, release CI workflow on v* tags."
     },
     {
       "id": "T016",

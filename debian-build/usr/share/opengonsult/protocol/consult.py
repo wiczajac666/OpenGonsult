@@ -15,11 +15,13 @@ Version: 2.0 (Enhanced Security & Reliability)
 import struct
 import time
 import hashlib
+import logging
 import random
-import secrets
-from typing import List, Optional, Tuple, Dict, Any
+from typing import List, Optional, Tuple, Dict
 from dataclasses import dataclass, field
 from enum import Enum
+
+logger = logging.getLogger(__name__)
 
 
 # ============================================================================
@@ -143,7 +145,7 @@ class FramedFrame:
         
         if self.signature in signature_cache:
             raise ReplayAttackError(
-                f"Duplicate signature detected! Possible replay attack detected."
+                "Duplicate signature detected! Possible replay attack detected."
             )
         
         # Add current signature to cache (in real implementation, would also 
