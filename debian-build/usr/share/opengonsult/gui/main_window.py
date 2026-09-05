@@ -21,16 +21,14 @@ import json
 import math
 import os
 import queue as thread_queue
-import random
 import threading
 import time
 
 import cairo
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gio, Gtk, Gdk, GLib, Pango
+from gi.repository import Gio, Gtk, GLib, Pango
 
-from dashboard.gauges import GaugeWidget
 from dashboard.simulator import SimulationEngine
 
 try:
@@ -1267,6 +1265,9 @@ class OpenGonsultApp(Gtk.Application):
             application_id=APP_ID,
             flags=Gio.ApplicationFlags.FLAGS_NONE,
         )
+        # Drawer entry is org.opengonsult.OpenGonsult.desktop (matches APP_ID);
+        # this is the X11 fallback so windows carry the goblin icon too.
+        Gtk.Window.set_default_icon_name("opengonsult")
 
     def do_activate(self):
         window = MainWindow(self)

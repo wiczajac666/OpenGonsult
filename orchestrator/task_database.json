@@ -312,6 +312,17 @@
       "progress": 0,
       "module": "releases/",
       "description": "Final .deb package for v0.88 release with all features."
+    },
+    {
+      "id": "T016",
+      "task": "GNOME application drawer entry with OpenGonsult.png icon",
+      "owner": "Kevin",
+      "priority": "Medium",
+      "status": "completed",
+      "depends_on": [],
+      "progress": 100,
+      "module": "packaging/",
+      "description": "App drawer entry (org.opengonsult.OpenGonsult.desktop matching APP_ID), hicolor index.theme for gtk-update-icon-cache, and X11 default icon fallback. deb/rpm paths only."
     }
   ]
 }

@@ -39,19 +39,21 @@ Features:
 mkdir -p %{buildroot}%{_datadir}/%{name} \
          %{buildroot}%{_bindir} \
          %{buildroot}%{_datadir}/applications \
+         %{buildroot}%{_datadir}/icons/hicolor \
          %{buildroot}%{_datadir}/icons/hicolor/256x256/apps \
          %{buildroot}%{_mandir}/man1
 cp -r gui ecu protocol serial graphs %{buildroot}%{_datadir}/%{name}/
 install -p -m 0755 packaging/rpm/opengonsult-launcher %{buildroot}%{_bindir}/%{name}
-install -p -m 0644 packaging/opengonsult.desktop %{buildroot}%{_datadir}/applications/%{name}.desktop
+install -p -m 0644 packaging/org.opengonsult.OpenGonsult.desktop %{buildroot}%{_datadir}/applications/org.opengonsult.OpenGonsult.desktop
+install -p -m 0644 packaging/hicolor/index.theme %{buildroot}%{_datadir}/icons/hicolor/index.theme
 install -p -m 0644 icons/OpenGonsult.png %{buildroot}%{_datadir}/icons/hicolor/256x256/apps/%{name}.png
 install -p -m 0644 packaging/rpm/opengonsult.1 %{buildroot}%{_mandir}/man1/%{name}.1
 
 %files
 %{_bindir}/%{name}
 %{_datadir}/%{name}/
-%{_datadir}/applications/%{name}.desktop
-%{_datadir}/icons/hicolor/256x256/apps/%{name}.png
+%{_datadir}/applications/org.opengonsult.OpenGonsult.desktop
+%{_datadir}/icons/hicolor/
 %{_mandir}/man1/%{name}.1.gz
 
 %changelog

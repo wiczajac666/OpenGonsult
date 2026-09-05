@@ -109,7 +109,7 @@ GTK4 only
 
 full Wayland support
 
-Gnome Desktop icon
+Gnome application drawer entry
 
 Responsibilities
 
@@ -357,7 +357,7 @@ launch command on linux terminal should be opengonsult
 
 GTK4 window title: OpenGonsult <version>
 GUI navigation panel left side ( like gnome settings window )
-Gnome desktop icon OpenGonsult.png
+Gnome application drawer entry icon OpenGonsult.png
 
 Window list:
 1. Dashboard 

@@ -136,6 +136,15 @@ check the Diagnostics page reads/clears codes.
   tree (see M1 Stage C for the sync procedure).
 - `packaging/rpm/` holds the RPM spec; `packaging/rpm/opengonsult.1` is the
   shared manpage source (re-`gzip` into the debian tree when it changes).
+- **GNOME integration**: the app drawer entry must match the GTK application
+  id — the desktop file is `org.opengonsult.OpenGonsult.desktop` (equals
+  `APP_ID`), so GNOME/Wayland attribute the window + drawer icon to
+  OpenGonsult. The hicolor theme canonically lives in `packaging/hicolor/`
+  (`index.theme` is mandatory for `gtk-update-icon-cache` to build the icon
+  cache); keep `debian-build/usr/share/icons/hicolor/` in sync. GTK4 dropped
+  per-window icon setters; the static
+  `Gtk.Window.set_default_icon_name("opengonsult")` is the X11 fallback (the
+  Wayland path is the app-id-matched desktop file).
 - The `.deb`/`.rpm` artifacts are built in **Milestone 12**.
 
 ## 8. Common pitfalls

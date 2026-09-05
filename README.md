@@ -54,6 +54,10 @@ dpkg -i OpenGonsult_0.88-1jammy_all.deb
 opengonsult --version
 ```
 
+Installing from `.deb`/`.rpm` also drops the app into your **GNOME
+application drawer** (with the goblin icon) via the
+`org.opengonsult.OpenGonsult.desktop` entry.
+
 **RPM folk:** there's a spec file in `packaging/rpm/opengonsult.spec` — build
 it with your favourite RPM sausage-maker.
 
