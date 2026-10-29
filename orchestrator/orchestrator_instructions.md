@@ -366,11 +366,26 @@ Window list:
 - shows graphs from multiple selectable sources
 3. Diagnostics
 - contains error code readings and translations for them, also error code reset button
-4. settings 
-- contains device selection (drop down and open field), theme selection 
-5. About
+4. Active Tests
+- power balance, solenoid/relay control, base idle adjustment, throttle position
+  adjustment, fuel pressure release, self-learn clear, ECCS reset, ROM reads
+5. Monitoring Set
+- selectable, reorderable, persistable sensor sets for dashboard/graphing
+6. settings 
+- contains device selection (drop down and open field), theme selection,
+  monitoring set configuration
+7. About
 - contains software information
+8. Logfile Analyzer
+- per-sensor min/max/mean and sample counts for recorded sessions
 ---
+
+Additional current modules/features:
+- ecu/active_tests.py — CONSULT-I activation commands (0x0A)
+- ecu/monitoring.py — monitoring set persistence
+- sessionrec/analyzer.py — logfile analysis
+- Wayland-native GTK4 operation with null-safe display/theme handling
+- Ubuntu/Debian packaging (0.99-1jammy) and GitHub releases
 
 # Milestones
 
@@ -384,7 +399,7 @@ Window list:
 8. DTC read/clear (nissan trouble codes)
 9. Session recording and replay
 10. Documentation and packaging
-11. Version 0.88 release
+11. Version 1.0 release
 
 This structure is well suited to orchestration frameworks such as OpenAI Codex, Claude Code, Aider, Roo Code, or similar systems where multiple coding agents can work concurrently under the supervision of an orchestrator that tracks task ownership, dependencies, progress, and integration.
 
