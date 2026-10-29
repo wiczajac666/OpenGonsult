@@ -7,7 +7,7 @@
 > It reads live engine sensors, graphs them, records sessions for replay, and
 > wrangles diagnostic trouble codes. Somehow it works. Probably.
 
-## 🔥 What's New in v0.95 📊💪
+## 🔥 What's New in v0.99 📊💪
 
 - ⚙️ **Real-time gauges** — RPM, coolant temp, battery voltage, vehicle speed,
   throttle position, O2 sensor (left/right), plus intake air, MAF, ignition
@@ -41,11 +41,12 @@ A bizarre collection of cooperating modules:
 - `ecu/` — sensor processing (`sensors.py`), the Nissan ECU database
   (`ecu_db.py`), the **DTC decoder** (`dtc.py`), active tests
   (`active_tests.py`) and the monitoring set (`monitoring.py`)
+- `sessionrec/` — session sample formats + logger + replayer + logfile
+  analyzer (`analyzer.py`) (CSV/SQLite/JSON)
 - `graphs/sensor_graph.py` — GTK4 graphing widget with session record/replay
-- `sessionrec/` — session sample formats + logger + replayer (CSV/SQLite/JSON)
 - `dashboard/` — gauge widgets and a software simulator for sensor data
 - `gui/main_window.py` — the GTK4 app shell (Dashboard, Graphing, Diagnostics,
-  Settings, About pages)
+  Active Tests, Settings, About pages)
 
 ## Installation 🔧
 
@@ -53,14 +54,14 @@ A bizarre collection of cooperating modules:
 
 ```bash
 pip install .
-opengonsult --version   # should say OpenGonsult 0.95
+opengonsult --version   # should say OpenGonsult 0.99
 ```
 
 **From the `.deb` package** (grab the one in `releases/` after a build, or check
 the GitHub releases page):
 
 ```bash
-dpkg -i OpenGonsult_0.95-1jammy_all.deb
+dpkg -i OpenGonsult_0.99-1jammy_all.deb
 opengonsult --version
 ```
 
@@ -145,6 +146,6 @@ Debian copyright file in `debian-build/`.
 
 ---
 
-*Created by wiczajac666 for the chaos 🧝✨📊 — v0.69+ got real sensor gauges,
-v0.88 got graphs, sessions and DTCs. What's next? Fuel injector séances,
-probably.*
+*Created by wiczajac666 for the chaos 🧝✨📊 — v0.99 reverse-engineers the
+Conzult active tests, monitoring sets and logfile analyzer. Fuel injector
+séances, probably.*
