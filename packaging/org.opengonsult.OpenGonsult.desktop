@@ -10,3 +10,4 @@ Type=Application
 Categories=Utility;Monitor;
 Keywords=Nissan;CONSULT;OBD;diagnostics;ECU;
 StartupNotify=true
+StartupWMClass=org.opengonsult.OpenGonsult
