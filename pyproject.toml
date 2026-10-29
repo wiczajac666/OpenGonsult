@@ -12,7 +12,7 @@ license-files = ["LICENSE"]
 authors = [
     { name = "OpenGonsult Maintainers", email = "OpenGonsult@users.noreply.github.com" },
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 keywords = ["nissan", "consult", "diagnostic", "obd", "gtk4"]
 classifiers = [
     "Development Status :: 4 - Beta",
