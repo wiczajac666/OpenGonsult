@@ -7,10 +7,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and
 this project adheres to a vaguely optimistic form of
 [Semantic Versioning](https://semver.org/).
 
-## [0.95] - 2026-10-29
+## [0.99] - 2026-10-29
 
 ### Added 🔥
 
+- **v0.99 audit hardening**:
+  - Fixed simulation/poll timer restart after stop/start cycles.
+  - Raised Python requirement to 3.10+ for modern type hints and asyncio APIs.
+  - Hardened graph color/label/unit maps for all monitored sensors.
+  - Prevented bogus `"none"` sensor buckets on unknown poll keys.
+  - Routed serial heartbeat through the command queue to avoid I/O races.
 - **v0.95 feature set (from Conzult reverse engineering)**:
   - Expanded sensor set: intake air temp, MAF, ignition timing, IACV-AAC/V,
     A/F alpha, injector pulse/duty, left/right O2 sensors

@@ -42,7 +42,15 @@ SENSOR_COLORS = {
     'intake_air_temp':    '#44ffff',  # cyan
     'maf_sensor':         '#ff44aa',  # pink
     'oxygen_sensor':      '#ffff44',  # yellow
+    'oxygen_sensor_left': '#ffff88',  # light yellow
+    'oxygen_sensor_right':'#ffff00',  # bright yellow
     'battery_voltage':    '#44ff44',  # green
+    'ignition_timing':    '#ff8844',  # amber
+    'iacv_aacv':          '#88ff44',  # lime
+    'af_alpha':           '#44ff88',  # mint
+    'injector_pulse':     '#8844ff',  # violet
+    'injector_duty':      '#cc44ff',  # magenta
+    'maf_voltage':        '#ff4488',  # rose
 }
 
 SENSOR_LABELS = {
@@ -53,7 +61,15 @@ SENSOR_LABELS = {
     'intake_air_temp':    'Intake Air Temp',
     'maf_sensor':         'MAF Sensor',
     'oxygen_sensor':      'O2 Sensor',
+    'oxygen_sensor_left': 'O2 Sensor (L)',
+    'oxygen_sensor_right':'O2 Sensor (R)',
     'battery_voltage':    'Battery Voltage',
+    'ignition_timing':    'Ignition Timing',
+    'iacv_aacv':          'IACV-AAC/V',
+    'af_alpha':           'A/F Alpha',
+    'injector_pulse':     'Injector Pulse',
+    'injector_duty':      'Injector Duty',
+    'maf_voltage':        'MAF Voltage',
 }
 
 SENSOR_UNITS = {
@@ -64,7 +80,15 @@ SENSOR_UNITS = {
     'intake_air_temp':    '°C',
     'maf_sensor':         'g/s',
     'oxygen_sensor':      'V',
+    'oxygen_sensor_left': 'V',
+    'oxygen_sensor_right':'V',
     'battery_voltage':    'V',
+    'ignition_timing':    'BTDC',
+    'iacv_aacv':          '%',
+    'af_alpha':           '%',
+    'injector_pulse':     'ms',
+    'injector_duty':      '%',
+    'maf_voltage':        'V',
 }
 
 

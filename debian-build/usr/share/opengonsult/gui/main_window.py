@@ -1238,7 +1238,7 @@ class MainWindow(Gtk.ApplicationWindow):
         worker.join(timeout=1.5)
 
     def start_poll_timer(self):
-        if not hasattr(self, "_poll_timer_id"):
+        if getattr(self, "_poll_timer_id", None) is None:
             self._poll_timer_id = GLib.timeout_add(POLL_INTERVAL_MS, self.poll_tick)
 
     def stop_poll_timer(self):
@@ -1274,8 +1274,10 @@ class MainWindow(Gtk.ApplicationWindow):
                 try:
                     sensor_type = SensorType[key.upper()]
                 except KeyError:
-                    sensor_type = None
-            if SensorReading is not None:
+                    # Skip sensors the processor cannot represent instead of
+                    # polluting history with a bogus "none" bucket.
+                    continue
+            if SensorReading is not None and sensor_type is not None:
                 reading = SensorReading(
                     sensor_type=sensor_type,
                     value=float(value),
@@ -1310,7 +1312,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.sim_start_time = time.time()
         self.simulator = SimulationEngine(self.processor)
         self.simulator.start()
-        if not hasattr(self, "_sim_timer_id"):
+        if getattr(self, "_sim_timer_id", None) is None:
             self._sim_timer_id = GLib.timeout_add(SIM_INTERVAL_MS, self.simulation_tick)
 
     def stop_simulation(self):

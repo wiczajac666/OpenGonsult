@@ -343,8 +343,12 @@ class SerialAdapter:
                 await asyncio.sleep(self.config.heartbeat_interval_s)
                 if not self.is_connected:
                     break
-                # Send a dummy byte to verify the port is responsive
-                self._port.write(b'\x00')
+                # Send a dummy byte through the command queue to verify the
+                # port is responsive without racing with other I/O.
+                try:
+                    await self.write(b'\x00')
+                except Exception:
+                    pass
             except (SerialTimeoutError, TimeoutError):
                 logger.warning("Heartbeat timeout detected")
             except asyncio.CancelledError:
