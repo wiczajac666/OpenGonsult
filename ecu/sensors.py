@@ -22,7 +22,15 @@ class SensorType(Enum):
     INTAKE_AIR_TEMP = "intake_air_temp"  # Intake air temp °C
     MAF_SENSOR = "maf_sensor"  # Mass airflow g/s
     OXYGEN_SENSOR = "oxygen_sensor"  # O2 sensor voltage V (0.1-3V typical)
+    OXYGEN_SENSOR_LEFT = "oxygen_sensor_left"  # Left bank O2 sensor (Z32 TT)
+    OXYGEN_SENSOR_RIGHT = "oxygen_sensor_right"  # Right bank O2 sensor (Z32 TT)
     BATTERY_VOLTAGE = "battery_voltage"  # Battery/system voltage V
+    IGNITION_TIMING = "ignition_timing"  # Ignition timing (deg BTDC)
+    IACV_AACV = "iacv_aacv"  # IACV-AAC/V duty cycle %
+    AF_ALPHA = "af_alpha"  # A/F alpha %
+    INJECTOR_PULSE = "injector_pulse"  # Injector pulse width ms
+    INJECTOR_DUTY = "injector_duty"  # Injector duty cycle %
+    MAF_VOLTAGE = "maf_voltage"  # MAF sensor voltage V
 
 
 @dataclass
@@ -58,8 +66,21 @@ class DashboardDataProcessor:
 
         self.sensor_names = {
             "engine_rpm": {"name": "Engine RPM", "unit": "RPM"},
-            "coolant_temp": {"name": "Coolant Temp", "unit": "°C"}, 
+            "coolant_temp": {"name": "Coolant Temp", "unit": "°C"},
             "battery_voltage": {"name": "Battery Voltage", "unit": "V"},
+            "vehicle_speed": {"name": "Vehicle Speed", "unit": "km/h"},
+            "throttle_position": {"name": "Throttle Position", "unit": "%"},
+            "oxygen_sensor": {"name": "O2 Sensor", "unit": "V"},
+            "oxygen_sensor_left": {"name": "O2 Sensor (L)", "unit": "V"},
+            "oxygen_sensor_right": {"name": "O2 Sensor (R)", "unit": "V"},
+            "intake_air_temp": {"name": "Intake Air Temp", "unit": "°C"},
+            "maf_sensor": {"name": "MAF Sensor", "unit": "g/s"},
+            "maf_voltage": {"name": "MAF Voltage", "unit": "V"},
+            "ignition_timing": {"name": "Ignition Timing", "unit": "BTDC"},
+            "iacv_aacv": {"name": "IACV-AAC/V", "unit": "%"},
+            "af_alpha": {"name": "A/F Alpha", "unit": "%"},
+            "injector_pulse": {"name": "Injector Pulse", "unit": "ms"},
+            "injector_duty": {"name": "Injector Duty", "unit": "%"},
         }
 
     def subscribe(self, callback: Callable[[str, float, float], None]) -> None:

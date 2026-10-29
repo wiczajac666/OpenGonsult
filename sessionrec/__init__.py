@@ -19,6 +19,7 @@ from .formats import (
 )
 from .session_logger import SessionLogger
 from .replay import SessionReplayer, PlaybackError
+from .analyzer import LogfileAnalyzer, analyze_samples
 
 __all__ = [
     "SessionSample",

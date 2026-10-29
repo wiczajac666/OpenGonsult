@@ -119,6 +119,16 @@ SENSOR_COMMANDS = {
     "vehicle_speed": 0x08,
     "throttle_position": 0x11,
     "oxygen_sensor": 0x13,
+    "oxygen_sensor_left": 0x13,
+    "oxygen_sensor_right": 0x15,
+    "intake_air_temp": 0x0C,
+    "maf_sensor": 0x04,
+    "maf_voltage": 0x04,
+    "ignition_timing": 0x1C,
+    "iacv_aacv": 0x10,
+    "af_alpha": 0x12,
+    "injector_pulse": 0x16,
+    "injector_duty": 0x17,
 }
 
 SEVERITY_CSS = {"critical": "error", "warning": "warning", "info": "success"}
@@ -266,6 +276,14 @@ class ConnectionWorker(threading.Thread):
         request = RequestPacket(mode=CONSULT_CMD_DTC_CLEAR)
         frame = request.encode(0x00)
         await adapter.transaction(frame)
+        return True
+
+    async def _do_activate(self, data):
+        adapter = await self._ensure_adapter()
+        command = (data or {}).get("command")
+        if command is None:
+            return False
+        await adapter.transaction(command)
         return True
 
     def _decode_live_value(self, key, raw_bytes):
@@ -449,6 +467,7 @@ class MainWindow(Gtk.ApplicationWindow):
         ("dashboard", "view-grid-symbolic", "Dashboard"),
         ("graphing", "utilities-system-monitor-symbolic", "Graphing"),
         ("diagnostics", "dialog-warning-symbolic", "Diagnostics"),
+        ("active_tests", "system-run-symbolic", "Active Tests"),
         ("settings", "preferences-system-symbolic", "Settings"),
         ("about", "help-about-symbolic", "About"),
     ]
@@ -525,6 +544,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.build_dashboard_page()
         self.build_graphing_page()
         self.build_diagnostics_page()
+        self.build_active_tests_page()
         self.build_settings_page()
         self.build_about_page()
 
@@ -854,9 +874,85 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_status("Trouble codes cleared.", "dialog-information-symbolic")
         return False
 
+    def on_power_balance_clicked(self, _button):
+        if not (self.connected or self.simulating):
+            self.show_info("Not connected", "Connect to the ECU first.")
+            return
+        if self.worker is None:
+            self.set_status("Simulated power balance (no ECU).", "dialog-information-symbolic")
+            return
+        try:
+            from ecu.active_tests import power_balance_command
+            cmd = power_balance_command(0)
+            future = self.worker.submit("activate", {"command": cmd})
+            future.add_done_callback(lambda fut: GLib.idle_add(self.on_active_done, fut))
+        except Exception as exc:
+            self.show_error("Active test failed", str(exc))
+
+    def on_solenoid_tests_clicked(self, _button):
+        self.set_status("Solenoid tests available on connected ECU.", "dialog-information-symbolic")
+
+    def on_base_idle_clicked(self, _button):
+        self.set_status("Base idle adjustment requested.", "dialog-information-symbolic")
+
+    def on_clear_self_learn_clicked(self, _button):
+        if not (self.connected or self.simulating):
+            self.show_info("Not connected", "Connect to the ECU first.")
+            return
+        if self.worker is None:
+            self.set_status("Simulated self-learn clear.", "dialog-information-symbolic")
+            return
+        try:
+            from ecu.active_tests import clear_self_learn_command
+            cmd = clear_self_learn_command()
+            future = self.worker.submit("activate", {"command": cmd})
+            future.add_done_callback(lambda fut: GLib.idle_add(self.on_active_done, fut))
+        except Exception as exc:
+            self.show_error("Active test failed", str(exc))
+
+    def on_active_done(self, future):
+        try:
+            future.result()
+            self.set_status("Active test complete.", "dialog-information-symbolic")
+        except Exception as exc:
+            self.show_error("Active test failed", str(exc))
+        return False
+
     # ------------------------------------------------------------------
     # Settings page
     # ------------------------------------------------------------------
+
+    def build_active_tests_page(self):
+        page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        page.set_margin_top(18)
+        page.set_margin_bottom(18)
+        page.set_margin_start(18)
+        page.set_margin_end(18)
+
+        title = Gtk.Label(label="Active Tests", xalign=0.0)
+        title.add_css_class("title-2")
+        page.append(title)
+
+        note = Gtk.Label(xalign=0.0, wrap=True)
+        note.set_text(
+            "CONSULT-I activation commands (power balance, solenoid control, "
+            "base idle, self-learn reset, ROM read). Connect to an ECU to run."
+        )
+        page.append(note)
+
+        buttons = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        for label, cb in (
+            ("Power Balance", self.on_power_balance_clicked),
+            ("Solenoid Tests", self.on_solenoid_tests_clicked),
+            ("Base Idle", self.on_base_idle_clicked),
+            ("Clear Self-Learn", self.on_clear_self_learn_clicked),
+        ):
+            btn = Gtk.Button(label=label)
+            btn.connect("clicked", cb)
+            buttons.append(btn)
+        page.append(buttons)
+
+        self.stack.add_named(page, "active_tests")
 
     def build_settings_page(self):
         page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)

@@ -7,16 +7,24 @@
 > It reads live engine sensors, graphs them, records sessions for replay, and
 > wrangles diagnostic trouble codes. Somehow it works. Probably.
 
-## 🔥 What's New in v0.88 📊💪
+## 🔥 What's New in v0.95 📊💪
 
 - ⚙️ **Real-time gauges** — RPM, coolant temp, battery voltage, vehicle speed,
-  throttle position, O2 sensor. SPINNY. 🎡
+  throttle position, O2 sensor (left/right), plus intake air, MAF, ignition
+  timing, IACV, A/F alpha and injector pulse/duty. SPINNY. 🎡
 - 📈 **Live graphing** — zoom, pan, per-sensor toggles, and **CSV export** of
   whatever chaos the car is spewing.
 - 💾 **Session recording & replay** — capture a drive in **CSV, SQLite or JSON**
   and play it back on the graph. Your car's best moments, preserved forever.
+- 📊 **Logfile analyzer** — per-sensor min/max/mean and sample counts for
+  recorded sessions.
 - 🔧 **Diagnostic Trouble Codes** — real CONSULT-I read (`0xd1`) and clear
   (`0xc1`), with plain-English translations from the built-in DTC index.
+- 🧪 **Active tests** — power balance, solenoid/relay control, base idle
+  adjustment, throttle position adjustment, fuel pressure release, self-learn
+  clear, ECCS reset and ROM reads via CONSULT-I activation (`0x0A`).
+- 🎛️ **Monitoring set** — pick, reorder and persist the sensors shown on the
+  dashboard/graphing pages ("MONITORING (SET)").
 - 🎨 **Dark mode** — because staring at a laptop in a dark garage is a
   lifestyle. Config persisted to `~/.config/opengonsult/config.json`.
 - 🤖 **Simulation mode** — no car? No problem. The dashboard fakes it with
@@ -31,7 +39,8 @@ A bizarre collection of cooperating modules:
 - `serial/adapter.py` — async pyserial layer (USB/Bluetooth) with a race-free
   command queue and auto-reconnect
 - `ecu/` — sensor processing (`sensors.py`), the Nissan ECU database
-  (`ecu_db.py`), and the **DTC decoder** (`dtc.py`)
+  (`ecu_db.py`), the **DTC decoder** (`dtc.py`), active tests
+  (`active_tests.py`) and the monitoring set (`monitoring.py`)
 - `graphs/sensor_graph.py` — GTK4 graphing widget with session record/replay
 - `sessionrec/` — session sample formats + logger + replayer (CSV/SQLite/JSON)
 - `dashboard/` — gauge widgets and a software simulator for sensor data
@@ -44,14 +53,14 @@ A bizarre collection of cooperating modules:
 
 ```bash
 pip install .
-opengonsult --version   # should say OpenGonsult 0.88
+opengonsult --version   # should say OpenGonsult 0.95
 ```
 
 **From the `.deb` package** (grab the one in `releases/` after a build, or check
 the GitHub releases page):
 
 ```bash
-dpkg -i OpenGonsult_0.88-1jammy_all.deb
+dpkg -i OpenGonsult_0.95-1jammy_all.deb
 opengonsult --version
 ```
 

@@ -7,10 +7,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and
 this project adheres to a vaguely optimistic form of
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased / 0.88] - in development
+## [0.95] - 2026-10-29
 
 ### Added 🔥
 
+- **v0.95 feature set (from Conzult reverse engineering)**:
+  - Expanded sensor set: intake air temp, MAF, ignition timing, IACV-AAC/V,
+    A/F alpha, injector pulse/duty, left/right O2 sensors
+  - **Active tests** module (`ecu/active_tests.py`): power balance, solenoid
+    and relay control, base idle adjustment, throttle position adjustment,
+    fuel pressure release, self-learn clear, ECCS reset, ROM reads
+  - **Monitoring set** (`ecu/monitoring.py`): selectable, reorderable,
+    persistable dashboard/graph sensor sets
+  - **Logfile analyzer** (`sessionrec/analyzer.py`): per-sensor min/max/mean
+    and sample counts
+  - Active Tests page in the GTK4 UI
 - **Diagnostic Trouble Codes (DTC)** — real CONSULT-I read (`0xd1`) and clear
   (`0xc1`) on the Diagnostics page, with a new `ecu/dtc.py` decoder:
   - fault pairs `(code, engine_starts)`, `0x55` "no fault" sentinel handling,

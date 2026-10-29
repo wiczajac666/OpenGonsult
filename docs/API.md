@@ -127,3 +127,24 @@ with `SESSION_HEADERS = ["timestamp", "sensor", "value"]`.
 | `SensorGraphWidget.set_data_processor(processor)` | attach a data source |
 | `SensorGraphWidget.destroy()` | clean up timers/handlers |
 | `SENSOR_COLORS` / `SENSOR_LABELS` / `SENSOR_UNITS` | per-sensor presentation maps |
+## `ecu.active_tests` — active tests / ECU control
+
+| Symbol | Description |
+|--------|-------------|
+| `CONSULT_CMD_ACTIVATE = 0x0A` | activation command mode byte |
+| `ACTIVE_POWER_BALANCE = 0x88` | power-balance activation type |
+| `ACTIVE_FUEL_PUMP_RELAY = 0x89` | fuel-pump relay activation type |
+| `ACTIVE_SELF_LEARN_CLEAR = 0x8B` | clear self-learn activation type |
+| `power_balance_command(cylinders_off=0) -> bytes` | build a power-balance command |
+| `fuel_pump_command(on=True) -> bytes` | fuel-pump relay on/off |
+| `clear_self_learn_command() -> bytes` | clear learned trim values |
+| `rom_read_command(addresses) -> bytes` | read ROM bytes |
+| `ActiveTestController(sender=None)` | high-level helper grouping operations |
+
+## `ecu.monitoring` — monitoring set
+
+| Symbol | Description |
+|--------|-------------|
+| `MonitoringSet(sensors=None)` | ordered, de-duplicated sensor set |
+| `.add(sensor) / .remove(sensor) / .move(sensor, index)` | mutate the set |
+| `.to_config() / .from_config(config)` | persist/restore |

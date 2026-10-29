@@ -66,8 +66,15 @@ class ECUDatabase:
                 "intake_air_temp": SensorDefinition("Intake Air Temp", "°C", -40, 120),
                 "maf_sensor": SensorDefinition("MAF Sensor", "g/s", 0, 500),
                 "oxygen_sensor": SensorDefinition("O2 Sensor", "V", 0, 1.5),
-                # v0.69+ additions: Battery voltage monitoring for dashboard gauges
+                "oxygen_sensor_left": SensorDefinition("O2 Sensor (L)", "V", 0, 1.5),
+                "oxygen_sensor_right": SensorDefinition("O2 Sensor (R)", "V", 0, 1.5),
                 "battery_voltage": SensorDefinition("Battery Voltage", "V", 8.0, 16.0),
+                "ignition_timing": SensorDefinition("Ignition Timing", "deg BTDC", -10, 60),
+                "iacv_aacv": SensorDefinition("IACV-AAC/V", "%", 0, 100),
+                "af_alpha": SensorDefinition("A/F Alpha", "%", 0, 200),
+                "injector_pulse": SensorDefinition("Injector Pulse", "ms", 0, 20),
+                "injector_duty": SensorDefinition("Injector Duty", "%", 0, 100),
+                "maf_voltage": SensorDefinition("MAF Voltage", "V", 0, 5),
             },
             dtc_codes={
                 "P0300": DTCDefinition(
