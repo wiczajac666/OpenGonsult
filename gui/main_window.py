@@ -486,12 +486,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_title(APP_NAME + " " + APP_VERSION)
         # Set a reasonable default size (720p)
         self.set_default_size(1280, 720)
-        # Limit the maximum width to something that fits a 1080p screen comfortably
-        self.set_max_width_request(1280)
-        # Limit the maximum width to something that fits a 1080p screen comfortably
-        self.set_max_width_request(1280) 
-        # Limit the maximum width to something that fits a 1080p screen comfortably
-        self.set_max_width_request(1280) 
+        # Default size already set above; GTK4 has no max-width request API.
 
         self.config = load_config()
         self.processor = (
@@ -654,10 +649,6 @@ class MainWindow(Gtk.ApplicationWindow):
             self.gauges[key] = gauge
             flow.append(gauge)
 
-        # Dynamic reflow on window resize — use a draw controller on the
-        # viewport so it fires whenever the allocated size changes.
-        viewport.connect("size-allocate", self._reflow_gauges)
-
         note = Gtk.Label(xalign=0.0)
         note.add_css_class("dim-label")
         if SerialAdapter is None or self.processor is None:
@@ -670,43 +661,6 @@ class MainWindow(Gtk.ApplicationWindow):
         page.append(note)
 
         self.stack.add_named(page, "dashboard")
-
-    def _reflow_gauges(self, _widget, _height=0, _data=None):
-        """Re-layout gauges dynamically based on available viewport width."""
-        # Walk from viewport -> grid
-        viewport = _widget
-        grid = viewport.get_child() if viewport else None
-        if grid is None:
-            return
-
-        # Clear existing attachments
-        child = grid.get_first_child()
-        while child is not None:
-            next_child = child.get_next_sibling()
-            grid.remove(child)
-            child = next_child
-
-        # Get available width from the viewport
-        avail_width = viewport.get_allocated_width()
-        if avail_width <= 0:
-            avail_width = 1200
-
-        # Minimum width per gauge cell (gauge + spacing)
-        MIN_GAUGE_WIDTH = 280  # generous minimum so gauges stay readable
-        col_spacing = 24
-        num_cols = max(1, avail_width // (MIN_GAUGE_WIDTH + col_spacing))
-
-        index = 0
-        for key, _label_text, _unit, minimum, maximum in GAUGE_DEFS:
-            gauge = self.gauges[key]
-            col = index % num_cols
-            row = index // num_cols
-            grid.attach(gauge, col, row, 1, 1)
-            index += 1
-
-        # Redraw all gauges after reflow
-        for gauge in self.gauges.values():
-            gauge.queue_draw()
 
     def start_gauge_timer(self):
         timer_id = GLib.timeout_add(GAUGE_INTERVAL_MS, self.refresh_gauges)
@@ -737,45 +691,10 @@ class MainWindow(Gtk.ApplicationWindow):
         title.add_css_class("title-2")
         page.append(title)
 
-        # Toolbar with Sources button + graph widget
-        toolbar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        toolbar.set_margin_bottom(8)
-        toolbar.set_hexpand(True)
-
-        sources_btn = Gtk.Button(label="Sources")
-        sources_btn.add_css_class("suggested-action")
-        sources_btn.connect("clicked", self._on_sources_clicked)
-        toolbar.append(sources_btn)
-
-        toolbar.append(Gtk.Separator())
-
-        # Time window selector
-        window_label = Gtk.Label(label="Time window:")
-        toolbar.append(window_label)
-        self.window_combo = Gtk.ComboBoxText.new()
-        self.window_combo.append_text("30s")
-        self.window_combo.append_text("60s")
-        self.window_combo.append_text("120s")
-        self.window_combo.append_text("300s")
-        self.window_combo.set_active(2)
-        self.window_combo.connect("changed", self._on_window_changed)
-        toolbar.append(self.window_combo)
-
-        toolbar.append(Gtk.Separator())
-
-        # Auto-scroll toggle
-        self.auto_scroll_switch = Gtk.Switch()
-        self.auto_scroll_switch.set_active(True)
-        toolbar.append(Gtk.Label(label="Auto-scroll:"))
-        toolbar.append(self.auto_scroll_switch)
-
-        page.append(toolbar)
-
         if SensorGraphWidget is not None and self.processor is not None:
             graph_widget = SensorGraphWidget(
                 data_processor=self.processor,
                 config_file=CONFIG_FILE,
-                auto_scroll_switch=self.auto_scroll_switch,
             )
             page.append(graph_widget)
             self.graph_widget = graph_widget
@@ -786,60 +705,6 @@ class MainWindow(Gtk.ApplicationWindow):
             page.append(placeholder)
 
         self.stack.add_named(page, "graphing")
-
-    # ------------------------------------------------------------------
-    # Sources dialog
-    # ------------------------------------------------------------------
-
-    def _on_sources_clicked(self, _button):
-        dialog = Gtk.Dialog(
-            title="Graph Sources",
-            transient_for=self,
-            flags=0,
-        )
-        dialog.set_default_size(420, 500)
-        dialog.add_button("Close", Gtk.ResponseType.CLOSE)
-
-        content = dialog.get_content_area()
-        content.set_orientation(Gtk.Orientation.VERTICAL)
-        content.set_margin_top(12)
-        content.set_margin_bottom(12)
-        content.set_margin_start(12)
-        content.set_margin_end(12)
-        content.set_spacing(8)
-
-        info = Gtk.Label(label="Select sensors to display on the graph.")
-        info.add_css_class("dim-label")
-        info.set_xalign(0.0)
-        content.append(info)
-
-        content.append(Gtk.Separator())
-
-        scroll = Gtk.ScrolledWindow()
-        scroll.set_vexpand(True)
-        scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-        content.append(scroll)
-
-        list_box = Gtk.ListBox()
-        list_box.set_selection_mode(Gtk.SelectionMode.NONE)
-        scroll.set_child(list_box)
-
-        # Store checkbox refs so toggling here updates the graph widget
-        self._source_checkboxes = {}
-        for key in SENSOR_COLORS:
-            cb = Gtk.CheckButton(label=SENSOR_LABELS.get(key, key))
-            cb.set_active(True)
-            cb.connect("toggled", self._on_source_toggled, key)
-            list_box.append(cb)
-            self._source_checkboxes[key] = cb
-
-        dialog.connect("response", lambda d, r: d.destroy())
-        dialog.present()
-
-    def _on_source_toggled(self, check_button: Gtk.CheckButton, sensor_key: str):
-        if hasattr(self, "graph_widget") and self.graph_widget is not None:
-            self.graph_widget.set_sensor_active(sensor_key, check_button.get_active())
-            self.graph_widget.graph_area.queue_draw()
 
     # ------------------------------------------------------------------
     # Error codes page
