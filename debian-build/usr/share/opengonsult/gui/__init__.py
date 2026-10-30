@@ -1,3 +1,3 @@
 """GUI package for OpenGonsult."""
 
-__version__ = "1.0"
+__version__ = "1.01"

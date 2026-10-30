@@ -54,14 +54,14 @@ A bizarre collection of cooperating modules:
 
 ```bash
 pip install .
-opengonsult --version   # should say OpenGonsult 1.0
+opengonsult --version   # should say OpenGonsult 1.01
 ```
 
 **From the `.deb` package** (grab the one in `releases/` after a build, or check
 the GitHub releases page):
 
 ```bash
-dpkg -i OpenGonsult_1.0-1jammy_all.deb
+dpkg -i OpenGonsult_1.01-1jammy_all.deb
 opengonsult --version
 ```
 
