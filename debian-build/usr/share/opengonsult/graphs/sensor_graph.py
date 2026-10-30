@@ -142,14 +142,19 @@ class SensorGraphWidget(Gtk.Box):
         toolbar.set_margin_bottom(6)
         toolbar.set_hexpand(True)
 
-        # Sensor checkboxes
+        # Sensor visibility checkboxes (shown in the separate Sources window)
         self.checkboxes: Dict[str, Gtk.CheckButton] = {}
         for key in SENSOR_COLORS:
             cb = Gtk.CheckButton(label=SENSOR_LABELS[key])
             cb.set_active(True)
             cb.connect("toggled", self._on_sensor_toggled, key)
-            toolbar.append(cb)
             self.checkboxes[key] = cb
+
+        # Sources button opens a separate window for source selection
+        sources_btn = Gtk.Button(label="Sources")
+        sources_btn.set_tooltip_text("Select graphed sensor sources")
+        sources_btn.connect("clicked", self._on_sources_clicked)
+        toolbar.append(sources_btn)
 
         toolbar.append(Gtk.Separator())
 
@@ -314,6 +319,52 @@ class SensorGraphWidget(Gtk.Box):
     def _on_sensor_toggled(self, check_button: Gtk.CheckButton, sensor_key: str):
         """Handle sensor checkbox toggle."""
         self.graph_area.queue_draw()
+
+    def _on_sources_clicked(self, button: Gtk.Button):
+        """Open a separate window for selecting graphed sources."""
+        window = getattr(self, "_sources_window", None)
+        if window is None or not window.get_visible():
+            window = Gtk.Window(title="Sources")
+            window.set_default_size(260, 360)
+            try:
+                root = self.get_root()
+                if root is not None:
+                    window.set_transient_for(root)
+            except Exception:
+                pass
+            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+            box.set_margin_top(8)
+            box.set_margin_bottom(8)
+            box.set_margin_start(8)
+            box.set_margin_end(8)
+            title = Gtk.Label(label="Graph sources")
+            title.add_css_class("heading")
+            box.append(title)
+            for key in SENSOR_COLORS:
+                cb = self.checkboxes[key]
+                try:
+                    if cb.get_parent() is not None:
+                        cb.unparent()
+                except Exception:
+                    pass
+                box.append(cb)
+            window.set_child(box)
+            window.connect("close-request", self._on_sources_close)
+            self._sources_window = window
+        window.present()
+
+    def _on_sources_close(self, window):
+        self._sources_window = None
+        return False
+
+    def set_sensor_active(self, sensor_key: str, active: bool):
+        """Programmatically enable/disable a sensor for graphing.
+
+        Used by the external Sources dialog to control visibility.
+        """
+        if sensor_key in self.checkboxes:
+            self.checkboxes[sensor_key].set_active(active)
+            self.graph_area.queue_draw()
 
     def _on_window_changed(self, combo: Gtk.ComboBoxText):
         """Handle time window selection change."""
@@ -753,11 +804,13 @@ class SensorGraphWidget(Gtk.Box):
             g = int(color_hex[3:5], 16) / 255.0
             b = int(color_hex[5:7], 16) / 255.0
             cr.set_source_rgba(r, g, b, 0.9)
-            cr.rectangle(legend_x, legend_y_current, 10, 12)
-            cr.fill()
+            cr.set_line_width(2.5)
+            cr.move_to(legend_x, legend_y_current + 6)
+            cr.line_to(legend_x + 16, legend_y_current + 6)
+            cr.stroke()
             cr.set_source_rgba(*text_color)
             label = SENSOR_LABELS[key]
-            cr.move_to(legend_x + 16, legend_y_current + 10)
+            cr.move_to(legend_x + 22, legend_y_current + 10)
             cr.show_text(label)
             legend_y_current += 20
 

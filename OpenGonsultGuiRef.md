@@ -15,4 +15,6 @@ Window list:
 3. Error codes
 - contains error code readings and translations for them
 4. settings 
-- contains device selection, theme selection 
+- contains device selection, theme selection
+5. about 
+- cointains information about the software 

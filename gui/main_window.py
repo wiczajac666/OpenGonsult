@@ -72,6 +72,11 @@ except ImportError:
     SENSOR_COLORS = {}
     SENSOR_LABELS = {}
 
+try:
+    from ecu.monitoring import MonitoringSet
+except ImportError:
+    MonitoringSet = None
+
 
 APP_ID = "org.opengonsult.OpenGonsult"
 APP_NAME = "OpenGonsult"
@@ -109,6 +114,8 @@ GAUGE_DIGITS = {
     "throttle_position": 0,
     "oxygen_sensor": 2,
 }
+
+GAUGE_DEF_MAP = {key: (key, label, unit, lo, hi) for key, label, unit, lo, hi in GAUGE_DEFS}
 
 CONSULT_ECU_ID = 1
 CONSULT_MODE_LIVE_DATA = 0x01
@@ -498,6 +505,9 @@ class MainWindow(Gtk.ApplicationWindow):
         self.simulating = bool(self.config.get("simulation"))
         self.sim_start_time = None
         self.dtc_codes = []
+        self.monitored_sensors = (
+            MonitoringSet.from_config(self.config) if MonitoringSet is not None else None
+        )
 
         self.gauges = {}
         self.timer_ids = []
@@ -627,8 +637,13 @@ class MainWindow(Gtk.ApplicationWindow):
         flow.set_hexpand(True)
         viewport.set_child(flow)
         page.append(viewport)
+        self.dashboard_flow = flow
 
-        for key, label_text, unit, minimum, maximum in GAUGE_DEFS:
+        monitored = list(self.monitored_sensors) if self.monitored_sensors is not None else [g[0] for g in GAUGE_DEFS]
+        for key in monitored:
+            if key not in GAUGE_DEF_MAP:
+                continue
+            _k, label_text, unit, minimum, maximum = GAUGE_DEF_MAP[key]
             gauge = GaugeWidget(
                 label_text,
                 unit,
@@ -1163,6 +1178,49 @@ class MainWindow(Gtk.ApplicationWindow):
         self.theme_combo.connect("changed", self.on_theme_changed)
         form.attach(self.theme_combo, 1, 3, 2, 1)
 
+        # Monitoring set (gauge layout) editor.
+        if MonitoringSet is not None:
+            ms_label = Gtk.Label(label="Monitoring set (dashboard gauges)", xalign=0.0)
+            ms_label.add_css_class("heading")
+            page.append(ms_label)
+
+            ms_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+            ms_box.set_vexpand(True)
+            page.append(ms_box)
+
+            self.monitored_list = Gtk.ListBox()
+            self.monitored_list.set_selection_mode(Gtk.SelectionMode.SINGLE)
+            scroll = Gtk.ScrolledWindow()
+            scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+            scroll.set_child(self.monitored_list)
+            scroll.set_size_request(220, 180)
+            ms_box.append(scroll)
+
+            btn_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+            add_btn = Gtk.Button(label="Add")
+            add_btn.connect("clicked", self.on_monitored_add_clicked)
+            btn_box.append(add_btn)
+            remove_btn = Gtk.Button(label="Remove")
+            remove_btn.connect("clicked", self.on_monitored_remove_clicked)
+            btn_box.append(remove_btn)
+            up_btn = Gtk.Button(label="Up")
+            up_btn.connect("clicked", self.on_monitored_up_clicked)
+            btn_box.append(up_btn)
+            down_btn = Gtk.Button(label="Down")
+            down_btn.connect("clicked", self.on_monitored_down_clicked)
+            btn_box.append(down_btn)
+            ms_box.append(btn_box)
+
+            avail_label = Gtk.Label(label="Available sensors", xalign=0.0)
+            page.append(avail_label)
+            self.available_combo = Gtk.ComboBoxText()
+            for key in GAUGE_DEF_MAP:
+                self.available_combo.append_text(key)
+            self.available_combo.set_active(0)
+            page.append(self.available_combo)
+
+            self.refresh_monitored_list()
+
         hint = Gtk.Label(xalign=0.0)
         hint.add_css_class("dim-label")
         hint.set_wrap(True)
@@ -1224,6 +1282,103 @@ class MainWindow(Gtk.ApplicationWindow):
         if text:
             self.config["baud_rate"] = int(text)
             self.persist_settings()
+
+    def refresh_monitored_list(self):
+        if not hasattr(self, "monitored_list"):
+            return
+        child = self.monitored_list.get_first_child()
+        while child is not None:
+            nxt = child.get_next_sibling()
+            self.monitored_list.remove(child)
+            child = nxt
+        if self.monitored_sensors is None:
+            return
+        for key in self.monitored_sensors:
+            row = Gtk.ListBoxRow()
+            label = Gtk.Label(label=key, xalign=0.0)
+            row.set_child(label)
+            row.sensor_key = key
+            self.monitored_list.append(row)
+
+    def _selected_monitored_key(self):
+        row = self.monitored_list.get_selected_row()
+        if row is None:
+            return None
+        return getattr(row, "sensor_key", None)
+
+    def on_monitored_add_clicked(self, _button):
+        if self.monitored_sensors is None or not hasattr(self, "available_combo"):
+            return
+        key = self.available_combo.get_active_text()
+        if key:
+            self.monitored_sensors.add(key)
+            self._persist_monitored()
+            self.refresh_monitored_list()
+
+    def on_monitored_remove_clicked(self, _button):
+        if self.monitored_sensors is None:
+            return
+        key = self._selected_monitored_key()
+        if key:
+            self.monitored_sensors.remove(key)
+            self._persist_monitored()
+            self.refresh_monitored_list()
+
+    def on_monitored_up_clicked(self, _button):
+        if self.monitored_sensors is None:
+            return
+        key = self._selected_monitored_key()
+        if key:
+            sensors = self.monitored_sensors.sensors()
+            idx = sensors.index(key) if key in sensors else -1
+            if idx > 0:
+                self.monitored_sensors.move(key, idx - 1)
+                self._persist_monitored()
+                self.refresh_monitored_list()
+
+    def on_monitored_down_clicked(self, _button):
+        if self.monitored_sensors is None:
+            return
+        key = self._selected_monitored_key()
+        if key:
+            sensors = self.monitored_sensors.sensors()
+            idx = sensors.index(key) if key in sensors else -1
+            if 0 <= idx < len(sensors) - 1:
+                self.monitored_sensors.move(key, idx + 1)
+                self._persist_monitored()
+                self.refresh_monitored_list()
+
+    def _persist_monitored(self):
+        if self.monitored_sensors is None:
+            return
+        self.config.update(self.monitored_sensors.to_config())
+        self.persist_settings()
+        self.rebuild_dashboard_gauges()
+
+    def rebuild_dashboard_gauges(self):
+        if not hasattr(self, "dashboard_flow"):
+            return
+        flow = self.dashboard_flow
+        child = flow.get_first_child()
+        while child is not None:
+            nxt = child.get_next_sibling()
+            flow.remove(child)
+            child = nxt
+        self.gauges = {}
+        monitored = list(self.monitored_sensors) if self.monitored_sensors is not None else [g[0] for g in GAUGE_DEFS]
+        for key in monitored:
+            if key not in GAUGE_DEF_MAP:
+                continue
+            _k, label_text, unit, minimum, maximum = GAUGE_DEF_MAP[key]
+            gauge = GaugeWidget(
+                label_text,
+                unit,
+                minimum,
+                maximum,
+                digits=GAUGE_DIGITS.get(key, 1),
+            )
+            self.gauges[key] = gauge
+            flow.append(gauge)
 
     def on_theme_changed(self, combo):
         text = combo.get_active_text()
