@@ -358,7 +358,7 @@ launch command on linux terminal should be opengonsult
 GTK4 window title: OpenGonsult <version>
 GUI navigation panel left side ( like gnome settings window )
 Gnome application drawer entry icon OpenGonsult.png
-
+initial app window size 1280x720px, resizeable
 Window list:
 1. Dashboard 
 - contains voltages, rpm, Etc meters, visual style gauges, and common numbers for gauges.
