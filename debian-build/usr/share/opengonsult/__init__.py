@@ -1,0 +1,1 @@
+"""OpenGonsult package initialization."""

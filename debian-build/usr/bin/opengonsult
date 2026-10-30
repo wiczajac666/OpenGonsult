@@ -9,6 +9,10 @@ APP_PATH = "/usr/share/opengonsult"
 def main():
     if APP_PATH not in sys.path:
         sys.path.insert(0, APP_PATH)
+        import os
+        parent_path = os.path.dirname(APP_PATH)
+        if parent_path not in sys.path:
+            sys.path.insert(0, parent_path)
     if len(sys.argv) > 1 and sys.argv[1] in ("-v", "--version"):
         from gui import __version__
         print("OpenGonsult " + __version__)
