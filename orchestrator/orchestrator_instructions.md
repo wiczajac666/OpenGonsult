@@ -361,24 +361,40 @@ Gnome application drawer entry icon OpenGonsult.png
 
 Window list:
 1. Dashboard 
-- contains voltages, rpm, Etc meters, visual style gauges, and common numbers for gauges
+- contains voltages, rpm, Etc meters, visual style gauges, and common numbers for gauges.
+- the gauges shuold have dynamic placing. when resizing the window it rearranges them where they fit.
+also selections for graphing sources should be in a separate window with the button named :"sources"
+
 2. Graphing
+- graphing sources should be in a separate window with the button named :"sources"
 - shows graphs from multiple selectable sources
+- the graphing should show source name and the line in different color for every source like it is in "https://github.com/GNOME/gnome-system-monitor"  resources tab.
+
 3. Diagnostics
 - contains error code readings and translations for them, also error code reset button
+
 4. Active Tests
 - power balance, solenoid/relay control, base idle adjustment, throttle position
   adjustment, fuel pressure release, self-learn clear, ECCS reset, ROM reads
+
 5. Monitoring Set
 - selectable, reorderable, persistable sensor sets for dashboard/graphing
+
 6. settings 
 - contains device selection (drop down and open field), theme selection,
   monitoring set configuration
+
 7. About
 - contains software information
+
 8. Logfile Analyzer
 - per-sensor min/max/mean and sample counts for recorded sessions
----
+9. Responsive Dashboard
+- gauges flow and rearrange automatically on window resize
+10. Graph Sources Dialog
+- separate "Sources" window for selecting graphed sensors
+11. GNOME-style Graph Legend
+- colored line + source name for each plotted series
 
 Additional current modules/features:
 - ecu/active_tests.py — CONSULT-I activation commands (0x0A)
