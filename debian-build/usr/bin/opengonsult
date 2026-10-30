@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """OpenGonsult launcher - Nissan CONSULT-I diagnostic suite (system install)."""
 
+import os
 import sys
+import traceback
 
 APP_PATH = "/usr/share/opengonsult"
 
@@ -9,17 +11,16 @@ APP_PATH = "/usr/share/opengonsult"
 def main():
     if APP_PATH not in sys.path:
         sys.path.insert(0, APP_PATH)
-        import os
-        parent_path = os.path.dirname(APP_PATH)
-        if parent_path not in sys.path:
-            sys.path.insert(0, parent_path)
     if len(sys.argv) > 1 and sys.argv[1] in ("-v", "--version"):
         from gui import __version__
         print("OpenGonsult " + __version__)
         return 0
-    from gui.main_window import main as run_gui
-
-    return run_gui(sys.argv[1:])
+    try:
+        from gui.main_window import main as run_gui
+        return run_gui(sys.argv[1:])
+    except Exception:
+        traceback.print_exc()
+        return 1
 
 
 if __name__ == "__main__":
